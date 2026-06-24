@@ -23,7 +23,7 @@ export default function Chat() {
     <div className="h-full flex flex-col">
       <div className="bg-white dark:bg-[#1a1d27] p-6 border-b border-gray-100 dark:border-white/10 shadow-sm flex items-center gap-4 transition-colors">
         <div className="w-12 h-12 bg-glamp-100 dark:bg-glamp-500/20 rounded-full flex items-center justify-center text-glamp-600 dark:text-green-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
         </div>
         <div>
           <h2 className="font-bold text-lg text-gray-800 dark:text-white">Администратор</h2>
@@ -51,7 +51,7 @@ export default function Chat() {
           <input type="text" value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Написать сообщение..." className="flex-1 bg-transparent px-4 outline-none text-lg text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30" />
           <button onClick={send} className="w-12 h-12 bg-glamp-600 text-white rounded-full flex items-center justify-center hover:bg-glamp-700 shadow-md active:scale-95 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>
         </div>
       </div>
