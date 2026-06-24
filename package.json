@@ -14,10 +14,15 @@
     "build:admin": "npm run build -w @glamping/admin",
     "typecheck": "npm run typecheck -w @glamping/guest && npm run typecheck -w @glamping/admin",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "start": "serve apps/guest/dist -s -l $PORT",
+    "start:admin": "serve apps/admin/dist -s -l $PORT"
   },
   "devDependencies": {
     "concurrently": "^10.0.3",
     "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "serve": "^14.2.6"
   }
 }
