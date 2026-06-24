@@ -1,18 +1,25 @@
 import { useState } from 'react'
 import { mockServices } from '@glamping/utils'
-import type { TicketItem, ServiceLocation } from '@glamping/types'
+import type { TicketItem, ServiceLocation, Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
 import { FoodModal } from './FoodModal'
 import { MinibarModal } from './MinibarModal'
 import { TransferModal } from './TransferModal'
 import { CleaningModal } from './CleaningModal'
+import { CustomServiceModal } from './CustomServiceModal'
 import type { TransferDestination } from '@glamping/types'
 
 type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleaning' | null
 
+const SERVICE_COLORS: Record<string, string> = {
+  cs1: 'bg-amber-500',
+  cs2: 'bg-emerald-500',
+}
+
 export default function Home() {
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
+  const [activeService, setActiveService] = useState<Service | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
@@ -24,6 +31,12 @@ export default function Home() {
   function handleMinibarSubmit(_items: TicketItem[]) { showToast('Заказ из минибара оформлен') }
   function handleTransferSubmit(_destination: TransferDestination, _desiredAt: string) { showToast('Трансфер заказан') }
   function handleCleaningSubmit(_desiredAt: string) { showToast('Клининг запланирован') }
+  function handleCustomServiceSubmit(data: { serviceId: string }) {
+    const service = mockServices.find(s => s.id === data.serviceId)
+    showToast(`Заявка «${service?.name ?? 'Услуга'}» отправлена`)
+  }
+
+  const activeServices = mockServices.filter(s => s.active)
 
   return (
     <div className="p-8 animate-slide-up">
@@ -45,24 +58,25 @@ export default function Home() {
           <div className="p-3 bg-white/20 rounded-2xl w-fit text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
           <h3 className="text-xl font-bold">Открыть ворота</h3>
         </div>
-      </div>
 
-      {mockServices.filter(s => s.active).length > 0 && (
-        <div className="mt-8">
-          <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-4">Дополнительно</p>
-          <div className="grid grid-cols-2 gap-6">
-            {mockServices.filter(s => s.active).map(service => (
-              <ServiceTile key={service.id} icon={<span className="text-2xl">{service.icon ?? '✨'}</span>} label={service.name} sublabel={service.price} onClick={() => showToast(`Услуга "${service.name}" — свяжитесь с администратором`)} />
-            ))}
-          </div>
-        </div>
-      )}
+        {activeServices.map(service => (
+          <ServiceTile
+            key={service.id}
+            icon={<span className="text-2xl">{service.icon ?? '✨'}</span>}
+            label={service.name}
+            sublabel={service.price}
+            color={SERVICE_COLORS[service.id] ?? 'bg-gray-600'}
+            onClick={() => setActiveService(service)}
+          />
+        ))}
+      </div>
 
       {isConfirmType(activeModal) && <ConfirmSheet open={true} type={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirm} />}
       {activeModal === 'food' && <FoodModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleFoodSubmit} />}
       {activeModal === 'minibar' && <MinibarModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleMinibarSubmit} />}
       {activeModal === 'transfer' && <TransferModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleTransferSubmit} />}
       {activeModal === 'cleaning' && <CleaningModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleCleaningSubmit} />}
+      {activeService && <CustomServiceModal open={true} service={activeService} onClose={() => setActiveService(null)} onSubmit={handleCustomServiceSubmit} />}
 
       {toast && (
         <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-3 rounded-full shadow-2xl font-medium animate-slide-up z-50">
