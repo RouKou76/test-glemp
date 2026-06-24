@@ -6,7 +6,7 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) 
   useEffect(() => { if (!open) return; const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }; window.addEventListener('keydown', handler); return () => window.removeEventListener('keydown', handler) }, [open, onClose])
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/60" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="w-full sm:max-w-lg bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto animate-slide-up" onClick={e => e.stopPropagation()}>
         {title && (
           <div className="flex items-center justify-between p-6 bg-white dark:bg-[#1a1d27] rounded-t-3xl border-b border-gray-100 dark:border-white/10 transition-colors">
