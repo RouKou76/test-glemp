@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BottomSheet } from '@glamping/ui'
+import { Modal } from '@glamping/ui'
 import { mockMenuItems } from '@glamping/utils'
 import type { ServiceLocation, TicketItem, MealPeriod } from '@glamping/types'
 import { useMealPeriod } from '@/hooks/useMealPeriod'
@@ -28,7 +28,7 @@ export function FoodModal({ open, onClose, onSubmit }: FoodModalProps) {
   function handleSubmit() { onSubmit(cartItems, location); setStep('success') }
 
   return (
-    <BottomSheet open={open} onClose={handleClose} title={PERIOD_LABELS[currentPeriod]}>
+    <Modal open={open} onClose={handleClose} title={PERIOD_LABELS[currentPeriod]}>
       {isInBuffer && bufferEndsAt && step === 'edit' && (
         <div className="mx-6 mb-4 p-3 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30">
           <p className="text-sm text-orange-700 dark:text-orange-400">⏱ {PERIOD_LABELS[currentPeriod]} заканчивается в {bufferEndsAt.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}.{nextPeriod !== 'none' && ` Следующий период: ${PERIOD_LABELS[nextPeriod]}.`}</p>
@@ -94,6 +94,6 @@ export function FoodModal({ open, onClose, onSubmit }: FoodModalProps) {
           <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
         </div>
       )}
-    </BottomSheet>
+    </Modal>
   )
 }

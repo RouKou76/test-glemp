@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BottomSheet } from '@glamping/ui'
+import { Modal } from '@glamping/ui'
 import { mockMenuItems } from '@glamping/utils'
 import type { TicketItem } from '@glamping/types'
 
@@ -19,7 +19,7 @@ export function MinibarModal({ open, onClose, onSubmit }: MinibarModalProps) {
   function handleSubmit() { onSubmit(cartItems); setStep('success') }
 
   return (
-    <BottomSheet open={open} onClose={handleClose} title="Минибар">
+    <Modal open={open} onClose={handleClose} title="Минибар">
       {step === 'edit' && (
         <div className="p-6 space-y-4">
           <div className="space-y-3">
@@ -50,6 +50,6 @@ export function MinibarModal({ open, onClose, onSubmit }: MinibarModalProps) {
           <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
         </div>
       )}
-    </BottomSheet>
+    </Modal>
   )
 }

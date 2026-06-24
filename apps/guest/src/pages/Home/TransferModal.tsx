@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BottomSheet } from '@glamping/ui'
+import { Modal } from '@glamping/ui'
 import { mockTransferDestinations } from '@glamping/utils'
 import type { TransferDestination } from '@glamping/types'
 
@@ -18,7 +18,7 @@ export function TransferModal({ open, onClose, onSubmit }: TransferModalProps) {
   function handleSubmit() { if (!selected) return; onSubmit(selected, desiredAt); setStep('success') }
 
   return (
-    <BottomSheet open={open} onClose={handleClose} title="Трансфер">
+    <Modal open={open} onClose={handleClose} title="Трансфер">
       {step === 'edit' && (
         <div className="p-6 space-y-5">
           <div>
@@ -67,6 +67,6 @@ export function TransferModal({ open, onClose, onSubmit }: TransferModalProps) {
           <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
         </div>
       )}
-    </BottomSheet>
+    </Modal>
   )
 }

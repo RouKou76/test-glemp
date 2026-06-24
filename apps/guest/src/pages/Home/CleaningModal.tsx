@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BottomSheet } from '@glamping/ui'
+import { Modal } from '@glamping/ui'
 
 type Step = 'edit' | 'review' | 'success'
 interface CleaningModalProps { open: boolean; onClose: () => void; onSubmit: (desiredAt: string) => void }
@@ -16,7 +16,7 @@ export function CleaningModal({ open, onClose, onSubmit }: CleaningModalProps) {
   const formattedDate = desiredAt ? new Date(desiredAt).toLocaleString('ru', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
   return (
-    <BottomSheet open={open} onClose={handleClose} title="Заказ уборки">
+    <Modal open={open} onClose={handleClose} title="Заказ уборки">
       {step === 'edit' && (
         <div className="p-6 space-y-5">
           <p className="text-sm text-gray-600 dark:text-white/50">Выберите удобное время — мы проведём уборку домика.</p>
@@ -49,6 +49,6 @@ export function CleaningModal({ open, onClose, onSubmit }: CleaningModalProps) {
           <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
         </div>
       )}
-    </BottomSheet>
+    </Modal>
   )
 }
