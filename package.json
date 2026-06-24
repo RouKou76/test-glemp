@@ -1,0 +1,23 @@
+{
+  "name": "glamping-frontend",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n guest,admin -c cyan,magenta \"npm run dev -w @glamping/guest\" \"npm run dev -w @glamping/admin\"",
+    "dev:guest": "npm run dev -w @glamping/guest",
+    "dev:admin": "npm run dev -w @glamping/admin",
+    "build": "npm run build -w @glamping/guest && npm run build -w @glamping/admin",
+    "build:guest": "npm run build -w @glamping/guest",
+    "build:admin": "npm run build -w @glamping/admin",
+    "typecheck": "npm run typecheck -w @glamping/guest && npm run typecheck -w @glamping/admin",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "vitest": "^4.1.9"
+  }
+}
