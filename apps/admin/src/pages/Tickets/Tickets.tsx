@@ -40,7 +40,7 @@ export default function Tickets() {
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
         {(['all', 'new', 'accepted', 'in_progress', 'done'] as FilterStatus[]).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${statusFilter === s ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${statusFilter === s ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
             {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'accepted' ? 'Приняты' : s === 'in_progress' ? 'В работе' : 'Готово'}
           </button>
         ))}
@@ -48,14 +48,14 @@ export default function Tickets() {
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
         {(['all', 'food', 'minibar', 'transfer', 'cleaning', 'towels'] as FilterType[]).map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
             {t === 'all' ? 'Все типы' : TYPE_LABELS[t]}
           </button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-300 dark:text-white/20"><p className="text-4xl mb-3">📭</p><p className="text-sm">Нет заявок</p></div>
+        <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">📭</p><p className="text-sm">Нет заявок</p></div>
       ) : (
         <div className="space-y-3">
           {filtered.map(ticket => {
@@ -76,16 +76,16 @@ export default function Tickets() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 dark:text-white/30">{sentAt}</span>
+                    <span className="text-xs text-gray-500 dark:text-white/50">{sentAt}</span>
                     <Badge status={ticket.status} />
                   </div>
                 </div>
                 {ticket.items && ticket.items.length > 0 && (
                   <div className="space-y-1 my-2">
-                    {ticket.items.map(item => (<div key={item.menuItemId} className="flex justify-between text-xs text-gray-500 dark:text-white/50"><span>{item.name} × {item.quantity}</span><span>{item.price * item.quantity} ₽</span></div>))}
+                    {ticket.items.map(item => (<div key={item.menuItemId} className="flex justify-between text-xs text-gray-600 dark:text-white/50"><span>{item.name} × {item.quantity}</span><span>{item.price * item.quantity} ₽</span></div>))}
                   </div>
                 )}
-                <div className="space-y-1 text-xs text-gray-400 dark:text-white/30 my-2">
+                <div className="space-y-1 text-xs text-gray-500 dark:text-white/50 my-2">
                   {desiredAt && <p>⏱ Желаемое время: <span className="text-gray-600 dark:text-white/60">{desiredAt}</span></p>}
                   {ticket.location && <p>📍 Место: <span className="text-gray-600 dark:text-white/60">{ticket.location}</span></p>}
                   {ticket.geo && <p>🗺 Направление: <span className="text-gray-600 dark:text-white/60">{ticket.geo}</span></p>}

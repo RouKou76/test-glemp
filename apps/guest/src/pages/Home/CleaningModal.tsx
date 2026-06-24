@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Modal } from '@glamping/ui'
+import { BottomSheet } from '@glamping/ui'
 
 type Step = 'edit' | 'review' | 'success'
 interface CleaningModalProps { open: boolean; onClose: () => void; onSubmit: (desiredAt: string) => void }
@@ -16,12 +16,12 @@ export function CleaningModal({ open, onClose, onSubmit }: CleaningModalProps) {
   const formattedDate = desiredAt ? new Date(desiredAt).toLocaleString('ru', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
   return (
-    <Modal open={open} onClose={handleClose} title="Заказ уборки">
+    <BottomSheet open={open} onClose={handleClose} title="Заказ уборки">
       {step === 'edit' && (
         <div className="p-6 space-y-5">
-          <p className="text-sm text-gray-500 dark:text-white/50">Выберите удобное время — мы проведём уборку домика.</p>
+          <p className="text-sm text-gray-600 dark:text-white/50">Выберите удобное время — мы проведём уборку домика.</p>
           <div>
-            <p className="text-xs font-bold text-gray-500 dark:text-white/30 uppercase tracking-wider mb-2">Дата и время</p>
+            <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Дата и время</p>
             <input type="datetime-local" value={desiredAt} onChange={e => { setDesiredAt(e.target.value); setError('') }}
               className="w-full p-4 border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-lg text-gray-800 dark:text-white focus:ring-2 focus:ring-teal-500 focus:outline-none [color-scheme:dark]" />
             {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -35,7 +35,7 @@ export function CleaningModal({ open, onClose, onSubmit }: CleaningModalProps) {
             <p className="text-xs text-teal-600 dark:text-teal-400 mb-1">Время уборки</p>
             <p className="text-teal-800 dark:text-teal-300 font-semibold capitalize">{formattedDate}</p>
           </div>
-          <p className="text-xs text-gray-400 dark:text-white/30">Пожалуйста, будьте готовы освободить домик на время уборки.</p>
+          <p className="text-xs text-gray-500 dark:text-white/50">Пожалуйста, будьте готовы освободить домик на время уборки.</p>
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button onClick={() => setStep('edit')} className="bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3.5 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">← Назад</button>
             <button onClick={handleSubmit} className="bg-teal-600 text-white py-3.5 rounded-2xl font-semibold hover:bg-teal-700 transition-colors active:scale-95 shadow-sm">Подтвердить</button>
@@ -45,10 +45,10 @@ export function CleaningModal({ open, onClose, onSubmit }: CleaningModalProps) {
       {step === 'success' && (
         <div className="p-6 text-center space-y-4">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-          <div><p className="text-gray-800 dark:text-white font-bold text-lg">Заявка принята!</p><p className="text-gray-500 dark:text-white/40 text-sm mt-1">Клининг будет проведён в указанное время.</p></div>
+          <div><p className="text-gray-800 dark:text-white font-bold text-lg">Заявка принята!</p><p className="text-gray-600 dark:text-white/60 text-sm mt-1">Клининг будет проведён в указанное время.</p></div>
           <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
         </div>
       )}
-    </Modal>
+    </BottomSheet>
   )
 }

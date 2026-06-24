@@ -19,11 +19,11 @@ export default function Info() {
 
       <div className="grid grid-cols-2 gap-6 mb-8">
         <div className="bg-white dark:bg-[#1a1d27] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 transition-colors">
-          <h3 className="text-gray-500 dark:text-white/40 text-sm font-semibold mb-2 uppercase tracking-wider">Связь с администратором</h3>
+          <h3 className="text-gray-600 dark:text-white/60 text-sm font-semibold mb-2 uppercase tracking-wider">Связь с администратором</h3>
           <p className="text-xl font-bold text-gray-800 dark:text-white">+7 (999) 123-45-67</p>
         </div>
         <div className="bg-white dark:bg-[#1a1d27] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 transition-colors">
-          <h3 className="text-gray-500 dark:text-white/40 text-sm font-semibold mb-2 uppercase tracking-wider">Wi-Fi Подключение</h3>
+          <h3 className="text-gray-600 dark:text-white/60 text-sm font-semibold mb-2 uppercase tracking-wider">Wi-Fi Подключение</h3>
           <p className="text-lg text-gray-800 dark:text-white">Сеть: <strong>Glamp_Guest</strong></p>
           <p className="text-lg text-gray-800 dark:text-white">Пароль: <strong>forest2026</strong></p>
         </div>

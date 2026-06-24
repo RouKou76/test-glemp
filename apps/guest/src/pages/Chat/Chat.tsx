@@ -32,12 +32,12 @@ export default function Chat() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-[#0f1117] transition-colors">
-        {messages.length === 0 && <p className="text-center text-gray-400 dark:text-white/30 text-sm mt-10">Начните диалог с администратором</p>}
+        {messages.length === 0 && <p className="text-center text-gray-500 dark:text-white/50 text-sm mt-10">Начните диалог с администратором</p>}
         {messages.map(m => (
           <div key={m.id} className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[70%] p-4 rounded-2xl ${m.sender === 'guest' ? 'bg-glamp-600 text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>
               <p className="text-lg">{m.text}</p>
-              <span className={`text-xs mt-2 block ${m.sender === 'guest' ? 'text-glamp-200' : 'text-gray-400 dark:text-white/30'}`}>
+              <span className={`text-xs mt-2 block ${m.sender === 'guest' ? 'text-glamp-200' : 'text-gray-500 dark:text-white/50'}`}>
                 {new Date(m.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -49,7 +49,7 @@ export default function Chat() {
       <div className="p-4 bg-white dark:bg-[#1a1d27] border-t border-gray-200 dark:border-white/10 transition-colors">
         <div className="flex gap-2 bg-gray-50 dark:bg-white/5 p-2 rounded-full border border-gray-200 dark:border-white/10">
           <input type="text" value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()}
-            placeholder="Написать сообщение..." className="flex-1 bg-transparent px-4 outline-none text-lg text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30" />
+            placeholder="Написать сообщение..." className="flex-1 bg-transparent px-4 outline-none text-lg text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30" />
           <button onClick={send} className="w-12 h-12 bg-glamp-600 text-white rounded-full flex items-center justify-center hover:bg-glamp-700 shadow-md active:scale-95 transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>

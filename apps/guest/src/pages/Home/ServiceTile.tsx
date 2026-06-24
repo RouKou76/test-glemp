@@ -27,7 +27,7 @@ export const ServiceTile: React.FC<ServiceTileProps> = ({
       </div>
       <div>
         <h3 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-glamp-600 dark:group-hover:text-green-400 transition-colors">{label}</h3>
-        {sublabel && <p className="text-sm text-gray-400 dark:text-white/40 mt-0.5">{sublabel}</p>}
+        {sublabel && <p className="text-sm text-gray-500 dark:text-white/60 mt-0.5">{sublabel}</p>}
       </div>
     </div>
   )

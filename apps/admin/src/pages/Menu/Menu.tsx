@@ -33,19 +33,19 @@ export default function Menu() {
       </div>
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
         {([['all', 'Все'], ...Object.entries(CATEGORY_LABELS)] as [CategoryFilter, string][]).map(([val, label]) => (
-          <button key={val} onClick={() => setCategory(val)} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${category === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-100 dark:hover:bg-white/5'}`}>{label}</button>
+          <button key={val} onClick={() => setCategory(val)} className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${category === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>{label}</button>
         ))}
       </div>
       <div className="space-y-2">
-        {filtered.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-300 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>) : filtered.map(item => (
+        {filtered.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>) : filtered.map(item => (
           <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${item.hidden ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/3 opacity-50' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
-              <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.showPrice ? `${item.price} ₽` : 'Цена скрыта'}</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.showPrice ? `${item.price} ₽` : 'Цена скрыта'}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button onClick={() => toggleHidden(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">{item.hidden ? '👁 Показать' : '🙈 Скрыть'}</button>
-              <button onClick={() => openEdit(item)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">✏️</button>
+              <button onClick={() => toggleHidden(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">{item.hidden ? '👁 Показать' : '🙈 Скрыть'}</button>
+              <button onClick={() => openEdit(item)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">✏️</button>
               <button onClick={() => handleDelete(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
             </div>
           </div>
@@ -55,18 +55,18 @@ export default function Menu() {
         <div className="fixed inset-0 z-40 bg-black/60 flex items-end" onClick={() => setShowForm(false)}>
           <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-4 animate-slide-up" onClick={e => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editItem ? 'Редактировать блюдо' : 'Новое блюдо'}</h3>
-            <div><label className="text-xs font-bold text-gray-500 dark:text-white/40 mb-1 block">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
-            <div><label className="text-xs font-bold text-gray-500 dark:text-white/40 mb-1 block">Цена (₽)</label><input type="number" value={formPrice} onChange={e => setFormPrice(e.target.value)} min={0} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+            <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+            <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽)</label><input type="number" value={formPrice} onChange={e => setFormPrice(e.target.value)} min={0} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
             <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-white/40 mb-2 block">Категория</label>
-              <div className="grid grid-cols-2 gap-2">{(Object.entries(CATEGORY_LABELS) as [MenuCategory, string][]).map(([val, label]) => (<button key={val} onClick={() => setFormCategory(val)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
+              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
+              <div className="grid grid-cols-2 gap-2">{(Object.entries(CATEGORY_LABELS) as [MenuCategory, string][]).map(([val, label]) => (<button key={val} onClick={() => setFormCategory(val)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-white/70">Показывать цену гостям</span>
               <button onClick={() => setFormShowPrice(p => !p)} className={`w-12 h-6 rounded-full transition-colors relative ${formShowPrice ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formShowPrice ? 'left-7' : 'left-1'}`} /></button>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
+              <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
               <button onClick={handleSave} disabled={!formName.trim() || !formPrice} className="py-2.5 rounded-xl bg-glamp-600 hover:bg-glamp-700 disabled:opacity-30 text-white text-sm font-bold transition-colors active:scale-95">{editItem ? 'Сохранить' : 'Добавить'}</button>
             </div>
           </div>

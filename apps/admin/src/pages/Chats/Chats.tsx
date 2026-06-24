@@ -40,18 +40,18 @@ export default function Chats() {
         </div>
       </div>
       <div className="px-4 py-2 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-[#0f1117]">
-        <p className="text-xs text-gray-500 dark:text-white/40">Домик #{activeHouse.number} · {activeHouse.guestCount ?? '—'} гостей · {activeHouse.lang.toUpperCase()}</p>
+        <p className="text-xs text-gray-600 dark:text-white/60">Домик #{activeHouse.number} · {activeHouse.guestCount ?? '—'} гостей · {activeHouse.lang.toUpperCase()}</p>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#0f1117]">
         {activeMessages.length === 0 ? (
-          <p className="text-center text-gray-400 dark:text-white/30 text-sm mt-10">История сообщений пуста</p>
+          <p className="text-center text-gray-500 dark:text-white/50 text-sm mt-10">История сообщений пуста</p>
         ) : activeMessages.map(msg => {
           const isAdmin = msg.sender === 'admin'
           return (
             <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${isAdmin ? 'bg-black dark:bg-white dark:text-gray-900 text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>
                 <p>{msg.text}</p>
-                <span className="text-[10px] mt-1 block text-right text-gray-400 dark:text-white/30">{new Date(msg.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="text-[10px] mt-1 block text-right text-gray-500 dark:text-white/50">{new Date(msg.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
           )
@@ -60,7 +60,7 @@ export default function Chats() {
       </div>
       <div className="p-3 bg-white dark:bg-[#1a1d27] border-t border-gray-200 dark:border-white/10 flex gap-2 items-center">
         <input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder={`Сообщение в Домик #${activeHouse.number}...`} className="flex-1 bg-gray-100 dark:bg-white/5 px-4 py-3 rounded-full outline-none text-sm text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30" />
+          placeholder={`Сообщение в Домик #${activeHouse.number}...`} className="flex-1 bg-gray-100 dark:bg-white/5 px-4 py-3 rounded-full outline-none text-sm text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30" />
         <button onClick={handleSend} disabled={!input.trim()} className="w-10 h-10 bg-black dark:bg-white dark:text-gray-900 text-white rounded-full flex items-center justify-center shrink-0 disabled:opacity-30 active:scale-95 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>

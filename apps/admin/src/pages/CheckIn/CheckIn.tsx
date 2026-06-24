@@ -19,17 +19,17 @@ export default function CheckIn() {
 
   return (
     <div className="p-4 space-y-4">
-      <div><h2 className="text-2xl font-bold text-gray-800 dark:text-white">Домики</h2><p className="text-xs text-gray-400 dark:text-white/30 mt-1">Заселено: {occupied.length} · Свободно: {vacant.length}</p></div>
+      <div><h2 className="text-2xl font-bold text-gray-800 dark:text-white">Домики</h2><p className="text-xs text-gray-500 dark:text-white/50 mt-1">Заселено: {occupied.length} · Свободно: {vacant.length}</p></div>
       {occupied.length > 0 && (
         <section>
-          <p className="text-xs font-bold text-gray-500 dark:text-white/30 uppercase tracking-wider mb-2">Заселены</p>
+          <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Заселены</p>
           <div className="space-y-3">{occupied.map(house => (
             <div key={house.id} className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 space-y-3 shadow-sm transition-colors">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-base font-bold text-gray-800 dark:text-white">Домик №{house.number}</p>
-                  <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5">{house.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === house.lang)?.label}</p>
-                  {house.checkInAt && <p className="text-xs text-gray-300 dark:text-white/30 mt-0.5">Заезд: {formatCheckIn(house.checkInAt)}</p>}
+                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{house.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === house.lang)?.label}</p>
+                  {house.checkInAt && <p className="text-xs text-gray-400 dark:text-white/50 mt-0.5">Заезд: {formatCheckIn(house.checkInAt)}</p>}
                 </div>
                 <span className="bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold px-2.5 py-1 rounded-full">Занят</span>
               </div>
@@ -40,10 +40,10 @@ export default function CheckIn() {
       )}
       {vacant.length > 0 && (
         <section>
-          <p className="text-xs font-bold text-gray-500 dark:text-white/30 uppercase tracking-wider mb-2">Свободны</p>
+          <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Свободны</p>
           <div className="space-y-3">{vacant.map(house => (
             <div key={house.id} className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-colors">
-              <div><p className="text-base font-bold text-gray-800 dark:text-white">Домик №{house.number}</p><p className="text-xs text-gray-300 dark:text-white/30 mt-0.5">Свободен</p></div>
+              <div><p className="text-base font-bold text-gray-800 dark:text-white">Домик №{house.number}</p><p className="text-xs text-gray-400 dark:text-white/50 mt-0.5">Свободен</p></div>
               <button onClick={() => openCheckIn(house)} className="px-4 py-2 bg-glamp-600 text-white text-xs font-bold rounded-xl hover:bg-glamp-700 transition-colors active:scale-95">Заселить</button>
             </div>
           ))}</div>
@@ -54,20 +54,20 @@ export default function CheckIn() {
           <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-5 animate-slide-up" onClick={e => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">Заселение — Домик №{selectedHouse.number}</h3>
             <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-white/40 mb-2 block">Количество гостей</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Количество гостей</label>
               <div className="flex items-center gap-4">
                 <button onClick={() => setFormGuests(g => Math.max(2, g - 1))} className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
                 <span className="text-2xl font-bold text-gray-800 dark:text-white w-8 text-center">{formGuests}</span>
                 <button onClick={() => setFormGuests(g => Math.min(8, g + 1))} className="w-10 h-10 rounded-full bg-glamp-600 hover:bg-glamp-700 text-white flex items-center justify-center transition-colors text-lg">+</button>
-                <span className="text-xs text-gray-400 dark:text-white/30">от 2 до 8</span>
+                <span className="text-xs text-gray-500 dark:text-white/50">от 2 до 8</span>
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 dark:text-white/40 mb-2 block">Язык планшета</label>
-              <div className="grid grid-cols-3 gap-2">{LANG_OPTIONS.map(opt => (<button key={opt.value} onClick={() => setFormLang(opt.value)} className={`py-2.5 rounded-xl text-xs font-medium border transition-colors ${formLang === opt.value ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{opt.label}</button>))}</div>
+              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Язык планшета</label>
+              <div className="grid grid-cols-3 gap-2">{LANG_OPTIONS.map(opt => (<button key={opt.value} onClick={() => setFormLang(opt.value)} className={`py-2.5 rounded-xl text-xs font-medium border transition-colors ${formLang === opt.value ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{opt.label}</button>))}</div>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-1">
-              <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
+              <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>
               <button onClick={handleCheckIn} className="py-2.5 rounded-xl bg-glamp-600 hover:bg-glamp-700 text-white text-sm font-bold transition-colors active:scale-95">Заселить</button>
             </div>
           </div>
