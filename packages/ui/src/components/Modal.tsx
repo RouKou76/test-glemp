@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export interface ModalProps { open: boolean; onClose: () => void; title?: string; children: React.ReactNode }
 
 export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) => {
   useEffect(() => { if (!open) return; const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }; window.addEventListener('keydown', handler); return () => window.removeEventListener('keydown', handler) }, [open, onClose])
   if (!open) return null
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="w-full sm:max-w-lg bg-gray-50 dark:bg-[#1a1d27] rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto animate-modal-in" onClick={e => e.stopPropagation()}>
         {title && (
@@ -18,6 +19,7 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children }) 
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
