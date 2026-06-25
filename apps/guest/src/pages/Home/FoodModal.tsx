@@ -110,13 +110,16 @@ export function FoodModal({ open, onClose, onSubmit }: FoodModalProps) {
         <div className="p-6 space-y-5">
           <div>
             <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">Дата</label>
-            <div className="grid grid-cols-2 gap-2">
+            <input type="date" value={orderDate} min={todayStr()} max={tomorrowStr()}
+              onChange={e => setOrderDate(e.target.value)}
+              className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
+            <div className="flex gap-2 mt-2">
               <button onClick={() => setOrderDate(todayStr())}
-                className={`py-3 rounded-xl text-sm font-semibold border transition-colors ${orderDate === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${orderDate === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
                 Сегодня
               </button>
               <button onClick={() => setOrderDate(tomorrowStr())}
-                className={`py-3 rounded-xl text-sm font-semibold border transition-colors ${orderDate === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${orderDate === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
                 Завтра
               </button>
             </div>
