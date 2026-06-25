@@ -110,7 +110,7 @@ export function FoodModal({ open, onClose, onSubmit }: FoodModalProps) {
         <div className="p-6 space-y-5">
           <div>
             <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">Дата</label>
-            <input type="date" value={orderDate} min={todayStr()} max={tomorrowStr()}
+            <input type="date" value={orderDate} min={todayStr()} max={tomorrowStr()} lang="ru"
               onChange={e => setOrderDate(e.target.value)}
               className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
             <div className="flex gap-2 mt-2">
