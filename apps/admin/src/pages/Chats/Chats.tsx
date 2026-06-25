@@ -49,7 +49,7 @@ export default function Chats() {
           const isAdmin = msg.sender === 'admin'
           return (
             <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${isAdmin ? 'bg-black dark:bg-white dark:text-gray-900 text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>
+              <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${isAdmin ? 'bg-black dark:bg-white/15 dark:text-white text-white rounded-br-sm' : 'bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>
                 <p>{msg.text}</p>
                 <span className="text-[10px] mt-1 block text-right text-gray-500 dark:text-white/50">{new Date(msg.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>

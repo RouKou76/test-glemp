@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Modal } from '@glamping/ui'
 import type { MenuItem, TicketItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
@@ -46,6 +46,8 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   const [step, setStep] = useState<'edit' | 'success'>('edit')
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [cart, setCart] = useState<Record<string, number>>({})
+  const [cooldown, setCooldown] = useState(0)
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function setVal(key: string, value: unknown) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -65,6 +67,17 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
     setCart({})
     onClose()
   }
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) { clearInterval(cooldownRef.current!); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current) }
+  }, [cooldown])
 
   function handleSubmit() {
     const cartItems: TicketItem[] = Object.entries(cart)
@@ -94,6 +107,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
       onSubmit(values)
     }
     setStep('success')
+    setCooldown(5)
   }
 
   const menuStep = steps.find(s => s.type === 'menu')
@@ -236,9 +250,9 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
             </div>
           )}
 
-          <button onClick={handleSubmit}
-            className="w-full bg-glamp-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-glamp-700 active:scale-95 transition-all shadow-md">
-            Отправить
+          <button onClick={handleSubmit} disabled={cooldown > 0}
+            className="w-full bg-glamp-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-glamp-700 active:scale-95 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+            {cooldown > 0 ? `Подождите · ${cooldown}с` : 'Отправить'}
           </button>
         </div>
       )}

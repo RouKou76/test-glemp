@@ -11,7 +11,7 @@ export default function CheckIn() {
 
   function openCheckIn(house: House) { setSelectedHouse(house); setFormGuests(2); setFormLang('ru'); setShowForm(true) }
   function handleCheckIn() { if (!selectedHouse) return; setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied', guestCount: formGuests, lang: formLang, checkInAt: new Date().toISOString() } : h)); setShowForm(false) }
-  function handleCheckOut(houseId: string) { setHouses(prev => prev.map(h => h.id === houseId ? { ...h, status: 'vacant', guestCount: undefined, checkInAt: undefined } : h)) }
+  function handleCheckOut(houseId: string) { if (confirm('Выселить домик?')) setHouses(prev => prev.map(h => h.id === houseId ? { ...h, status: 'vacant', guestCount: undefined, checkInAt: undefined } : h)) }
   function formatCheckIn(iso: string): string { return new Date(iso).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) }
 
   const occupied = houses.filter(h => h.status === 'occupied')

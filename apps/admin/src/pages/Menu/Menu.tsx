@@ -23,7 +23,7 @@ export default function Menu() {
     setShowForm(false)
   }
   function toggleHidden(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, hidden: !i.hidden } : i)) }
-  function handleDelete(id: string) { setItems(prev => prev.filter(i => i.id !== id)) }
+  function handleDelete(id: string) { if (confirm('Удалить блюдо из меню?')) setItems(prev => prev.filter(i => i.id !== id)) }
 
   return (
     <div className="p-4 space-y-4">
@@ -38,7 +38,7 @@ export default function Menu() {
       </div>
       <div className="space-y-2">
         {filtered.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>) : filtered.map(item => (
-          <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${item.hidden ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/3 opacity-50' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
+          <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${item.hidden ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
               <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.showPrice ? `${item.price} ₽` : 'Цена скрыта'}</p>

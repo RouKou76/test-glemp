@@ -23,7 +23,7 @@ export default function Services() {
     setShowForm(false)
   }
   function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)) }
-  function handleDelete(id: string) { setServices(prev => prev.filter(s => s.id !== id)) }
+  function handleDelete(id: string) { if (confirm('Удалить услугу?')) setServices(prev => prev.filter(s => s.id !== id)) }
 
   return (
     <div className="p-4 space-y-4">
