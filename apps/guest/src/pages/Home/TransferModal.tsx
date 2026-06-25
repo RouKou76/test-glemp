@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal } from '@glamping/ui'
 import { mockTransferDestinations } from '@glamping/utils'
 import type { TransferDestination } from '@glamping/types'
+import { SuccessScreen } from './SuccessScreen'
 
 type Step = 'edit' | 'review' | 'success'
 interface TransferModalProps { open: boolean; onClose: () => void; onSubmit: (destination: TransferDestination, desiredAt: string) => void }
@@ -60,13 +61,7 @@ export function TransferModal({ open, onClose, onSubmit }: TransferModalProps) {
           </div>
         </div>
       )}
-      {step === 'success' && (
-        <div className="p-6 text-center space-y-4">
-          <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 mx-auto"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-          <div><p className="text-gray-800 dark:text-white font-bold text-lg">Заявка принята!</p><p className="text-gray-600 dark:text-white/60 text-sm mt-1">Водитель будет подан к указанному времени.</p></div>
-          <button onClick={handleClose} className="w-full bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white/60 py-3 rounded-2xl font-semibold hover:bg-gray-200 dark:hover:bg-white/20 transition-colors active:scale-95">Закрыть</button>
-        </div>
-      )}
+      {step === 'success' && <SuccessScreen title="Заявка принята!" message="Водитель будет подан к указанному времени." onClose={handleClose} />}
     </Modal>
   )
 }
