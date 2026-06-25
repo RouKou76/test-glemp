@@ -1,25 +1,72 @@
 import { useState } from 'react'
-import { mockServices } from '@glamping/utils'
-import type { TicketItem, ServiceLocation, Service } from '@glamping/types'
+import { mockServices, mockMenuItems, mockTransferDestinations } from '@glamping/utils'
+import type { Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
-import { FoodModal } from './FoodModal'
-import { MinibarModal } from './MinibarModal'
-import { TransferModal } from './TransferModal'
-import { CleaningModal } from './CleaningModal'
-import { CustomServiceModal } from './CustomServiceModal'
-import type { TransferDestination } from '@glamping/types'
+import { OrderForm, type OrderStep } from './OrderForm'
+
+const SERVICE_COLORS: Record<string, string> = { cs1: 'bg-amber-500', cs2: 'bg-emerald-500' }
+
+const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = {
+  food: {
+    title: 'Заказ питания',
+    steps: [
+      { type: 'date', key: 'date', label: 'Дата' },
+      { type: 'time', key: 'time', label: 'Время подачи' },
+      { type: 'select', key: 'period', label: 'Приём пищи', options: [
+        { value: 'breakfast', label: '🌅 Завтрак' }, { value: 'lunch', label: '☀️ Обед' }, { value: 'dinner', label: '🌙 Ужин' },
+      ]},
+      { type: 'select', key: 'location', label: 'Место подачи', options: [
+        { value: 'cabin', label: '🏠 В домик' }, { value: 'terrace', label: '🌿 На террасу' }, { value: 'gazebo', label: '⛺ В беседку' },
+      ]},
+      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar') },
+    ],
+    message: 'Заказ еды оформлен',
+  },
+  minibar: {
+    title: 'Пополнение мини-бара',
+    steps: [
+      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar') },
+    ],
+    message: 'Заказ из минибара оформлен',
+  },
+  transfer: {
+    title: 'Трансфер',
+    steps: [
+      { type: 'select', key: 'destination', label: 'Направление', options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
+      { type: 'date', key: 'date', label: 'Дата' },
+      { type: 'time', key: 'time', label: 'Время подачи' },
+    ],
+    message: 'Трансфер заказан',
+  },
+  cleaning: {
+    title: 'Заказ уборки',
+    steps: [
+      { type: 'date', key: 'date', label: 'Дата' },
+      { type: 'time', key: 'time', label: 'Время уборки' },
+    ],
+    message: 'Клининг запланирован',
+  },
+}
+
+function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
+  const steps: OrderStep[] = []
+  if (service.fields.desiredAt?.enabled) steps.push({ type: 'time', key: 'time', label: service.fields.desiredAt.label || 'Желаемое время' })
+  if (service.fields.location?.enabled) steps.push({ type: 'select', key: 'location', label: service.fields.location.label || 'Место', options: [
+    { value: 'cabin', label: '🏠 Домик' }, { value: 'terrace', label: '🌿 Терраса' }, { value: 'gazebo', label: '⛺ Беседка' },
+  ]})
+  if (service.fields.guestCount?.enabled) steps.push({ type: 'number', key: 'guestCount', label: service.fields.guestCount.label || 'Количество персон', min: 1, max: 20 })
+  if (service.fields.catalog?.enabled && service.items) steps.push({ type: 'catalog', key: 'catalog', label: service.fields.catalog.label || 'Каталог', items: service.items })
+  if (service.fields.geo?.enabled) steps.push({ type: 'text', key: 'geo', label: service.fields.geo.label || 'Адрес', placeholder: 'Введите адрес...' })
+  if (service.fields.comment?.enabled) steps.push({ type: 'textarea', key: 'comment', label: service.fields.comment.label || 'Комментарий', placeholder: 'Дополнительные пожелания...' })
+  return { title: service.name, steps, message: `Заявка «${service.name}» отправлена` }
+}
 
 type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleaning' | null
 
-const SERVICE_COLORS: Record<string, string> = {
-  cs1: 'bg-amber-500',
-  cs2: 'bg-emerald-500',
-}
-
 export default function Home() {
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
-  const [activeService, setActiveService] = useState<Service | null>(null)
+  const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
@@ -27,14 +74,7 @@ export default function Home() {
   const isConfirmType = (m: ActiveModal): m is ConfirmSheetType => m === 'towels' || m === 'gates'
 
   function handleConfirm(type: ConfirmSheetType) { showToast(type === 'towels' ? 'Замена полотенец заказана' : 'Запрос на ворота отправлен') }
-  function handleFoodSubmit(_items: TicketItem[], _location: ServiceLocation) { showToast('Заказ еды оформлен') }
-  function handleMinibarSubmit(_items: TicketItem[]) { showToast('Заказ из минибара оформлен') }
-  function handleTransferSubmit(_destination: TransferDestination, _desiredAt: string) { showToast('Трансфер заказан') }
-  function handleCleaningSubmit(_desiredAt: string) { showToast('Клининг запланирован') }
-  function handleCustomServiceSubmit(data: { serviceId: string }) {
-    const service = mockServices.find(s => s.id === data.serviceId)
-    showToast(`Заявка «${service?.name ?? 'Услуга'}» отправлена`)
-  }
+  function handleOrderSubmit(_data: Record<string, unknown>, message: string) { showToast(message) }
 
   const activeServices = mockServices.filter(s => s.active)
 
@@ -66,17 +106,32 @@ export default function Home() {
             label={service.name}
             sublabel={service.price}
             color={SERVICE_COLORS[service.id] ?? 'bg-gray-600'}
-            onClick={() => setActiveService(service)}
+            onClick={() => setActiveServiceConfig(buildServiceConfig(service))}
           />
         ))}
       </div>
 
       {isConfirmType(activeModal) && <ConfirmSheet open={true} type={activeModal} onClose={() => setActiveModal(null)} onConfirm={handleConfirm} />}
-      {activeModal === 'food' && <FoodModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleFoodSubmit} />}
-      {activeModal === 'minibar' && <MinibarModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleMinibarSubmit} />}
-      {activeModal === 'transfer' && <TransferModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleTransferSubmit} />}
-      {activeModal === 'cleaning' && <CleaningModal open={true} onClose={() => setActiveModal(null)} onSubmit={handleCleaningSubmit} />}
-      {activeService && <CustomServiceModal open={true} service={activeService} onClose={() => setActiveService(null)} onSubmit={handleCustomServiceSubmit} />}
+
+      {(activeModal === 'food' || activeModal === 'minibar' || activeModal === 'transfer' || activeModal === 'cleaning') && activeModal && (
+        <OrderForm
+          open={true}
+          title={SERVICE_CONFIGS[activeModal].title}
+          steps={SERVICE_CONFIGS[activeModal].steps}
+          onClose={() => setActiveModal(null)}
+          onSubmit={() => handleOrderSubmit({}, SERVICE_CONFIGS[activeModal].message)}
+        />
+      )}
+
+      {activeServiceConfig && (
+        <OrderForm
+          open={true}
+          title={activeServiceConfig.title}
+          steps={activeServiceConfig.steps}
+          onClose={() => setActiveServiceConfig(null)}
+          onSubmit={() => handleOrderSubmit({}, activeServiceConfig.message)}
+        />
+      )}
 
       {toast && (
         <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-3 rounded-full shadow-2xl font-medium animate-slide-up z-50">
