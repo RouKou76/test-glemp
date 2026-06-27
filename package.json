@@ -19,8 +19,9 @@
     "start:admin": "serve apps/admin/dist -s -l $PORT"
   },
   "devDependencies": {
-    "@vitejs/plugin-legacy": "^8.1.0",
+    "@vitejs/plugin-legacy": "^6.1.1",
     "concurrently": "^10.0.3",
+    "terser": "^5.48.0",
     "vitest": "^4.1.9"
   },
   "dependencies": {
