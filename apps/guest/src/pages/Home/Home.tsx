@@ -11,7 +11,7 @@ const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; messa
   food: {
     title: 'Заказ питания',
     steps: [
-      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'date', key: 'date', label: 'Дата' },
       { type: 'time', key: 'time', label: 'Время подачи', required: true },
       { type: 'select', key: 'period', label: 'Приём пищи', required: true, options: [
         { value: 'breakfast', label: '🌅 Завтрак' }, { value: 'lunch', label: '☀️ Обед' }, { value: 'dinner', label: '🌙 Ужин' },
@@ -34,7 +34,7 @@ const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; messa
     title: 'Трансфер',
     steps: [
       { type: 'select', key: 'destination', label: 'Направление', required: true, options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
-      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'date', key: 'date', label: 'Дата' },
       { type: 'time', key: 'time', label: 'Время подачи', required: true },
     ],
     message: 'Трансфер заказан',
@@ -42,7 +42,7 @@ const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; messa
   cleaning: {
     title: 'Заказ уборки',
     steps: [
-      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'date', key: 'date', label: 'Дата' },
       { type: 'time', key: 'time', label: 'Время уборки', required: true },
     ],
     message: 'Клининг запланирован',

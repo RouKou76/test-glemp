@@ -46,9 +46,10 @@ function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Rec
   const errors: Record<string, string> = {}
   for (const s of steps) {
     if (!s.required) continue
-    if (s.type === 'date') { if (!values[s.key]) errors[s.key] = 'Выберите дату' }
+    if (s.type === 'date') { continue }
     else if (s.type === 'time') { if (!values[s.key]) errors[s.key] = 'Выберите время' }
     else if (s.type === 'select') { if (!values[s.key]) errors[s.key] = `Выберите ${s.label.toLowerCase()}` }
+    else if (s.type === 'number') { continue }
     else if (s.type === 'text') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
     else if (s.type === 'textarea') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
     else if (s.type === 'menu') { if (!Object.values(cart).some(q => q > 0)) errors[s.key] = 'Выберите хотя бы одну позицию' }
