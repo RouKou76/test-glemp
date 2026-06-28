@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { mockHouses } from '@glamping/utils'
 import type { House, Lang } from '@glamping/types'
+import { ConfirmDialog } from '@glamping/ui'
 
 const LANG_OPTIONS: { value: Lang; label: string }[] = [{ value: 'ru', label: '🇷🇺 Русский' }, { value: 'en', label: '🇬🇧 English' }, { value: 'zh', label: '🇨🇳 中文' }]
 
@@ -11,7 +12,8 @@ export default function CheckIn() {
 
   function openCheckIn(house: House) { setSelectedHouse(house); setFormGuests(2); setFormLang('ru'); setShowForm(true) }
   function handleCheckIn() { if (!selectedHouse) return; setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied', guestCount: formGuests, lang: formLang, checkInAt: new Date().toISOString() } : h)); setShowForm(false) }
-  function handleCheckOut(houseId: string) { if (confirm('Выселить домик?')) setHouses(prev => prev.map(h => h.id === houseId ? { ...h, status: 'vacant', guestCount: undefined, checkInAt: undefined } : h)) }
+  const [checkoutId, setCheckoutId] = useState<string | null>(null)
+  function handleCheckoutConfirm() { if (checkoutId) setHouses(prev => prev.map(h => h.id === checkoutId ? { ...h, status: 'vacant', guestCount: undefined, checkInAt: undefined } : h)); setCheckoutId(null) }
   function formatCheckIn(iso: string): string { return new Date(iso).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) }
 
   const occupied = houses.filter(h => h.status === 'occupied')
@@ -33,7 +35,7 @@ export default function CheckIn() {
                 </div>
                 <span className="bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold px-2.5 py-1 rounded-full">Занят</span>
               </div>
-              <button onClick={() => handleCheckOut(house.id)} className="w-full py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-500 dark:text-red-400/70 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors active:scale-95">Выселить домик</button>
+              <button onClick={() => setCheckoutId(house.id)} className="w-full py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-500 dark:text-red-400/70 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors active:scale-95">Выселить домик</button>
             </div>
           ))}</div>
         </section>
@@ -73,6 +75,7 @@ export default function CheckIn() {
           </div>
         </div>
       )}
+      <ConfirmDialog open={!!checkoutId} title="Выселить домик?" message="Домик будет освобождён, чат очищен." confirmLabel="Выселить" onConfirm={handleCheckoutConfirm} onClose={() => setCheckoutId(null)} />
     </div>
   )
 }

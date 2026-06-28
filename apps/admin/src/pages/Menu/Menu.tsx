@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { mockMenuItems } from '@glamping/utils'
 import type { MenuItem, MenuCategory } from '@glamping/types'
+import { ConfirmDialog } from '@glamping/ui'
 
 type CategoryFilter = MenuCategory | 'all'
 const CATEGORY_LABELS: Record<MenuCategory, string> = { breakfast: '🌅 Завтрак', lunch: '☀️ Обед', dinner: '🌙 Ужин', minibar: '🧃 Минибар' }
@@ -23,7 +24,8 @@ export default function Menu() {
     setShowForm(false)
   }
   function toggleHidden(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, hidden: !i.hidden } : i)) }
-  function handleDelete(id: string) { if (confirm('Удалить блюдо из меню?')) setItems(prev => prev.filter(i => i.id !== id)) }
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  function handleDeleteConfirm() { if (deleteId) setItems(prev => prev.filter(i => i.id !== deleteId)); setDeleteId(null) }
 
   return (
     <div className="p-4 space-y-4">
@@ -46,7 +48,7 @@ export default function Menu() {
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => toggleHidden(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">{item.hidden ? '👁 Показать' : '🙈 Скрыть'}</button>
               <button onClick={() => openEdit(item)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">✏️</button>
-              <button onClick={() => handleDelete(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
+              <button onClick={() => setDeleteId(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
             </div>
           </div>
         ))}
@@ -72,6 +74,7 @@ export default function Menu() {
           </div>
         </div>
       )}
+      <ConfirmDialog open={!!deleteId} title="Удалить блюдо?" message="Блюдо будет удалено из меню безвозвратно." confirmLabel="Удалить" onConfirm={handleDeleteConfirm} onClose={() => setDeleteId(null)} />
     </div>
   )
 }

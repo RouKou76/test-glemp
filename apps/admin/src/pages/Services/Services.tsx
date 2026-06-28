@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { mockServices } from '@glamping/utils'
 import type { Service, AssignedRole, ServiceFieldConfig } from '@glamping/types'
+import { ConfirmDialog } from '@glamping/ui'
 
 const ROLE_LABELS: Record<AssignedRole, string> = { cook: '👨‍🍳 Повар', cleaning: '🧹 Клининг', driver: '🚗 Водитель', admin: '👤 Администратор' }
 const FIELD_LABELS: Record<keyof ServiceFieldConfig, string> = { desiredAt: '⏱ Время', location: '📍 Место', catalog: '📋 Каталог', geo: '🗺 Адрес', guestCount: '👥 Персоны', comment: '💬 Комментарий' }
@@ -23,7 +24,8 @@ export default function Services() {
     setShowForm(false)
   }
   function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)) }
-  function handleDelete(id: string) { if (confirm('Удалить услугу?')) setServices(prev => prev.filter(s => s.id !== id)) }
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  function handleDeleteConfirm() { if (deleteId) setServices(prev => prev.filter(s => s.id !== deleteId)); setDeleteId(null) }
 
   return (
     <div className="p-4 space-y-4">
@@ -44,7 +46,7 @@ export default function Services() {
             {Object.entries(service.fields).filter(([, f]) => f?.enabled).map(([key, f]) => (<div key={key} className="text-xs text-gray-500 dark:text-white/60 flex items-center gap-2"><span>{FIELD_LABELS[key as keyof ServiceFieldConfig]}</span>{f?.label && <span className="text-gray-400 dark:text-white/20">→ «{f.label}»</span>}</div>))}
             <div className="flex gap-2 pt-1">
               <button onClick={() => openEdit(service)} className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-xs font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">✏️ Редактировать</button>
-              <button onClick={() => handleDelete(service.id)} className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
+              <button onClick={() => setDeleteId(service.id)} className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
             </div>
           </div>
         ))}
@@ -73,6 +75,7 @@ export default function Services() {
           </div>
         </div>
       )}
+      <ConfirmDialog open={!!deleteId} title="Удалить услугу?" message="Услуга будет удалена безвозвратно." confirmLabel="Удалить" onConfirm={handleDeleteConfirm} onClose={() => setDeleteId(null)} />
     </div>
   )
 }
