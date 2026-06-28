@@ -26,6 +26,7 @@ export default function Chat() {
           <h2 className="font-bold text-xl text-gray-800 dark:text-gray-200">Администратор</h2>
           <p className="text-base text-green-600 dark:text-green-400 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> В сети</p>
         </div>
+        <div className="ml-auto shrink-0"><ThemeToggle /></div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-[#0f1117] transition-colors">
@@ -38,7 +39,6 @@ export default function Chat() {
                 {new Date(m.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </span>
         </div>
-        <div className="ml-auto"><ThemeToggle /></div>
       </div>
         ))}
         <div ref={endRef} />
