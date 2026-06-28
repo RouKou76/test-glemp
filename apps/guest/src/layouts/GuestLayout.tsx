@@ -8,7 +8,7 @@ export default function GuestLayout() {
         <Outlet />
       </main>
 
-      <div className="fixed bottom-28 right-4 z-40">
+      <div className="fixed top-4 right-4 z-40">
         <ThemeToggle />
       </div>
 
