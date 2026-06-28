@@ -127,17 +127,17 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
           {steps.map(s => {
             if (s.type === 'date') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <input type="date" value={(values[s.key] as string) || todayStr()} min={todayStr()} max={tomorrowStr()} lang="ru"
                   onChange={e => setVal(s.key, e.target.value)}
                   className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
                 <div className="flex gap-2 mt-2">
                   <button onClick={() => setVal(s.key, todayStr())}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
                     Сегодня
                   </button>
                   <button onClick={() => setVal(s.key, tomorrowStr())}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
                     Завтра
                   </button>
                 </div>
@@ -146,7 +146,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'time') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <input type="time" value={(values[s.key] as string) || ''} min={getMinTime((values.date as string) || todayStr())}
                   onChange={e => setVal(s.key, e.target.value)}
                   className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
@@ -155,7 +155,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'select') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <div className={`grid gap-2 ${s.options.length <= 3 ? `grid-cols-${s.options.length}` : 'grid-cols-2'}`}>
                   {s.options.map(opt => (
                     <button key={opt.value} onClick={() => setVal(s.key, opt.value)}
@@ -169,11 +169,11 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'number') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <div className="flex items-center gap-4">
                   <button onClick={() => setVal(s.key, Math.max(s.min ?? 1, ((values[s.key] as number) || (s.min ?? 1)) - 1))}
                     className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
-                  <span className="text-xl font-bold text-gray-800 dark:text-white w-8 text-center">{(values[s.key] as number) || s.min || 1}</span>
+                  <span className="text-lg font-bold text-gray-800 dark:text-white w-8 text-center">{(values[s.key] as number) || s.min || 1}</span>
                   <button onClick={() => setVal(s.key, Math.min(s.max ?? 99, ((values[s.key] as number) || (s.min ?? 1)) + 1))}
                     className="w-10 h-10 rounded-full bg-glamp-600 hover:bg-glamp-700 text-white flex items-center justify-center transition-colors text-lg">+</button>
                 </div>
@@ -182,7 +182,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'text') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <input type="text" value={(values[s.key] as string) || ''} placeholder={s.placeholder}
                   onChange={e => setVal(s.key, e.target.value)}
                   className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500" />
@@ -191,7 +191,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'textarea') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <textarea value={(values[s.key] as string) || ''} placeholder={s.placeholder} rows={3}
                   onChange={e => setVal(s.key, e.target.value)}
                   className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" />
@@ -200,7 +200,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'menu') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-3 block">Меню</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-3 block">Меню</label>
                 <div className="space-y-3">
                   {s.items.filter(i => !i.hidden).map(item => (
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm items-center gap-4">
@@ -210,10 +210,10 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                       </div>
                       <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 rounded-xl p-1 border border-gray-200 dark:border-white/10">
                         <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
-                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-xl active:scale-95 disabled:opacity-30 transition-all">−</button>
+                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-lg active:scale-95 disabled:opacity-30 transition-all">−</button>
                         <span className="w-6 text-center font-bold text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
                         <button onClick={() => setQty(item.id, +1)}
-                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-glamp-600 text-white shadow-sm font-bold text-xl active:scale-95 transition-all">+</button>
+                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-glamp-600 text-white shadow-sm font-bold text-lg active:scale-95 transition-all">+</button>
                       </div>
                     </div>
                   ))}
@@ -223,7 +223,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'catalog') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
                 <div className="space-y-2">
                   {s.items.filter(i => !i.hidden).map(item => (
                     <label key={item.id} className={`flex items-center justify-between p-3 rounded-xl border transition-colors cursor-pointer ${values[`${s.key}_selected_${item.id}`] ? 'border-glamp-500 bg-glamp-50 dark:bg-glamp-500/10' : 'border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
@@ -233,7 +233,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                           className="w-4 h-4 rounded border-gray-300 text-glamp-600 focus:ring-glamp-500" />
                         <span className="text-sm text-gray-800 dark:text-white">{item.name}</span>
                       </div>
-                      <span className="text-xs text-gray-500 dark:text-white/50">{item.price} ₽</span>
+                      <span className="text-sm text-gray-500 dark:text-white/50">{item.price} ₽</span>
                     </label>
                   ))}
                 </div>
