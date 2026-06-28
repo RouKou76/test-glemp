@@ -3,14 +3,14 @@ import { Modal } from '@glamping/ui'
 import type { MenuItem, TicketItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
 
-export interface OrderStepDate { type: 'date'; key: string; label: string }
-export interface OrderStepTime { type: 'time'; key: string; label: string; minAdvanceMinutes?: number }
-export interface OrderStepSelect { type: 'select'; key: string; label: string; options: { value: string; label: string }[] }
-export interface OrderStepNumber { type: 'number'; key: string; label: string; min?: number; max?: number }
-export interface OrderStepText { type: 'text'; key: string; label: string; placeholder?: string }
-export interface OrderStepTextarea { type: 'textarea'; key: string; label: string; placeholder?: string }
-export interface OrderStepMenu { type: 'menu'; key: string; items: MenuItem[] }
-export interface OrderStepCatalog { type: 'catalog'; key: string; label: string; items: { id: string; name: string; price: number; hidden?: boolean }[] }
+export interface OrderStepDate { type: 'date'; key: string; label: string; required?: boolean }
+export interface OrderStepTime { type: 'time'; key: string; label: string; minAdvanceMinutes?: number; required?: boolean }
+export interface OrderStepSelect { type: 'select'; key: string; label: string; options: { value: string; label: string }[]; required?: boolean }
+export interface OrderStepNumber { type: 'number'; key: string; label: string; min?: number; max?: number; required?: boolean }
+export interface OrderStepText { type: 'text'; key: string; label: string; placeholder?: string; required?: boolean }
+export interface OrderStepTextarea { type: 'textarea'; key: string; label: string; placeholder?: string; required?: boolean }
+export interface OrderStepMenu { type: 'menu'; key: string; items: MenuItem[]; required?: boolean }
+export interface OrderStepCatalog { type: 'catalog'; key: string; label: string; items: { id: string; name: string; price: number; hidden?: boolean }[]; required?: boolean }
 
 export type OrderStep = OrderStepDate | OrderStepTime | OrderStepSelect | OrderStepNumber | OrderStepText | OrderStepTextarea | OrderStepMenu | OrderStepCatalog
 
@@ -42,15 +42,40 @@ function getMinTime(dateStr: string): string {
   return '00:00'
 }
 
+function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
+  const errors: Record<string, string> = {}
+  for (const s of steps) {
+    if (!s.required) continue
+    if (s.type === 'date') { if (!values[s.key]) errors[s.key] = 'Выберите дату' }
+    else if (s.type === 'time') { if (!values[s.key]) errors[s.key] = 'Выберите время' }
+    else if (s.type === 'select') { if (!values[s.key]) errors[s.key] = `Выберите ${s.label.toLowerCase()}` }
+    else if (s.type === 'text') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
+    else if (s.type === 'textarea') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
+    else if (s.type === 'menu') { if (!Object.values(cart).some(q => q > 0)) errors[s.key] = 'Выберите хотя бы одну позицию' }
+    else if (s.type === 'catalog') {
+      const hasChecked = s.items.some(i => values[`${s.key}_selected_${i.id}`])
+      if (!hasChecked) errors[s.key] = 'Выберите хотя бы одну позицию'
+    }
+  }
+  return errors
+}
+
+function ErrorMsg({ text }: { text?: string }) {
+  if (!text) return null
+  return <p className="text-red-500 text-sm mt-1">{text}</p>
+}
+
 export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormProps) {
   const [step, setStep] = useState<'edit' | 'success'>('edit')
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [cart, setCart] = useState<Record<string, number>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [cooldown, setCooldown] = useState(0)
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function setVal(key: string, value: unknown) {
     setValues(prev => ({ ...prev, [key]: value }))
+    if (errors[key]) setErrors(prev => { const n = { ...prev }; delete n[key]; return n })
   }
 
   function setQty(id: string, delta: number) {
@@ -59,12 +84,15 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
       if (next[id] === 0) delete next[id]
       return next
     })
+    const menuStep = steps.find(s => s.type === 'menu')
+    if (menuStep) setErrors(prev => { const n = { ...prev }; delete n[menuStep.key]; return n })
   }
 
   function handleClose() {
     setStep('edit')
     setValues({})
     setCart({})
+    setErrors({})
     onClose()
   }
 
@@ -80,12 +108,18 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   }, [cooldown])
 
   function handleSubmit() {
+    const validationErrors = validate(steps, values, cart)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
     const cartItems: TicketItem[] = Object.entries(cart)
       .filter(([, qty]) => qty > 0)
       .map(([id, quantity]) => {
-        const step = steps.find(s => s.type === 'menu')
-        if (step && step.type === 'menu') {
-          const item = step.items.find(i => i.id === id)!
+        const ms = steps.find(s => s.type === 'menu')
+        if (ms && ms.type === 'menu') {
+          const item = ms.items.find(i => i.id === id)!
           return { menuItemId: id, name: item.name, price: item.price, quantity }
         }
         return { menuItemId: id, name: id, price: 0, quantity }
@@ -101,11 +135,8 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
     })
 
     const allItems = [...cartItems, ...catalogItems]
-    if (allItems.length > 0) {
-      onSubmit({ ...values, items: allItems })
-    } else {
-      onSubmit(values)
-    }
+    if (allItems.length > 0) onSubmit({ ...values, items: allItems })
+    else onSubmit(values)
     setStep('success')
     setCooldown(5)
   }
@@ -127,35 +158,31 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
           {steps.map(s => {
             if (s.type === 'date') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <input type="date" value={(values[s.key] as string) || todayStr()} min={todayStr()} max={tomorrowStr()} lang="ru"
                   onChange={e => setVal(s.key, e.target.value)}
-                  className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
+                  className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark] ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
                 <div className="flex gap-2 mt-2">
-                  <button onClick={() => setVal(s.key, todayStr())}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
-                    Сегодня
-                  </button>
-                  <button onClick={() => setVal(s.key, tomorrowStr())}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
-                    Завтра
-                  </button>
+                  <button onClick={() => setVal(s.key, todayStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>Сегодня</button>
+                  <button onClick={() => setVal(s.key, tomorrowStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>Завтра</button>
                 </div>
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'time') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <input type="time" value={(values[s.key] as string) || ''} min={getMinTime((values.date as string) || todayStr())}
                   onChange={e => setVal(s.key, e.target.value)}
-                  className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark]" />
+                  className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark] ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'select') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <div className={`grid gap-2 ${s.options.length <= 3 ? `grid-cols-${s.options.length}` : 'grid-cols-2'}`}>
                   {s.options.map(opt => (
                     <button key={opt.value} onClick={() => setVal(s.key, opt.value)}
@@ -164,43 +191,44 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                     </button>
                   ))}
                 </div>
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'number') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => setVal(s.key, Math.max(s.min ?? 1, ((values[s.key] as number) || (s.min ?? 1)) - 1))}
-                    className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
+                  <button onClick={() => setVal(s.key, Math.max(s.min ?? 1, ((values[s.key] as number) || (s.min ?? 1)) - 1))} className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-lg">−</button>
                   <span className="text-lg font-bold text-gray-800 dark:text-white w-8 text-center">{(values[s.key] as number) || s.min || 1}</span>
-                  <button onClick={() => setVal(s.key, Math.min(s.max ?? 99, ((values[s.key] as number) || (s.min ?? 1)) + 1))}
-                    className="w-10 h-10 rounded-full bg-glamp-600 hover:bg-glamp-700 text-white flex items-center justify-center transition-colors text-lg">+</button>
+                  <button onClick={() => setVal(s.key, Math.min(s.max ?? 99, ((values[s.key] as number) || (s.min ?? 1)) + 1))} className="w-10 h-10 rounded-full bg-glamp-600 hover:bg-glamp-700 text-white flex items-center justify-center transition-colors text-lg">+</button>
                 </div>
               </div>
             )
 
             if (s.type === 'text') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <input type="text" value={(values[s.key] as string) || ''} placeholder={s.placeholder}
                   onChange={e => setVal(s.key, e.target.value)}
-                  className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500" />
+                  className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'textarea') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <textarea value={(values[s.key] as string) || ''} placeholder={s.placeholder} rows={3}
                   onChange={e => setVal(s.key, e.target.value)}
-                  className="w-full p-3 border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 rounded-xl text-sm text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" />
+                  className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'menu') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-3 block">Меню</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-3 block">Меню{s.required && ' *'}</label>
                 <div className="space-y-3">
                   {s.items.filter(i => !i.hidden).map(item => (
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm items-center gap-4">
@@ -209,21 +237,20 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                         {item.showPrice && <p className="text-sm text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>}
                       </div>
                       <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 rounded-xl p-1 border border-gray-200 dark:border-white/10">
-                        <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
-                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-lg active:scale-95 disabled:opacity-30 transition-all">−</button>
+                        <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]} className="w-10 h-10 flex justify-center items-center rounded-lg bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-lg active:scale-95 disabled:opacity-30 transition-all">−</button>
                         <span className="w-6 text-center font-bold text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
-                        <button onClick={() => setQty(item.id, +1)}
-                          className="w-10 h-10 flex justify-center items-center rounded-lg bg-glamp-600 text-white shadow-sm font-bold text-lg active:scale-95 transition-all">+</button>
+                        <button onClick={() => setQty(item.id, +1)} className="w-10 h-10 flex justify-center items-center rounded-lg bg-glamp-600 text-white shadow-sm font-bold text-lg active:scale-95 transition-all">+</button>
                       </div>
                     </div>
                   ))}
                 </div>
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 
             if (s.type === 'catalog') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}</label>
+                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <div className="space-y-2">
                   {s.items.filter(i => !i.hidden).map(item => (
                     <label key={item.id} className={`flex items-center justify-between p-3 rounded-xl border transition-colors cursor-pointer ${values[`${s.key}_selected_${item.id}`] ? 'border-glamp-500 bg-glamp-50 dark:bg-glamp-500/10' : 'border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
@@ -237,6 +264,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                     </label>
                   ))}
                 </div>
+                <ErrorMsg text={errors[s.key]} />
               </div>
             )
 

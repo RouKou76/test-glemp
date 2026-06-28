@@ -17,8 +17,14 @@ export default function Menu() {
   const filtered = useMemo(() => items.filter(i => category === 'all' || i.category === category), [items, category])
   function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormShowPrice(true); setShowForm(true) }
   function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormShowPrice(item.showPrice); setShowForm(true) }
+  const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
   function handleSave() {
-    const price = Number(formPrice); if (!formName.trim() || isNaN(price) || price < 0) return
+    const errs: { name?: string; price?: string } = {}
+    if (!formName.trim()) errs.name = 'Введите название'
+    const price = Number(formPrice)
+    if (!formPrice || isNaN(price) || price < 0) errs.price = 'Укажите корректную цену'
+    if (Object.keys(errs).length > 0) { setFormErrors(errs); return }
+    setFormErrors({})
     if (editItem) { setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, name: formName.trim(), price, category: formCategory, showPrice: formShowPrice } : i)) }
     else { setItems(prev => [...prev, { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, hidden: false, showPrice: formShowPrice }]) }
     setShowForm(false)
@@ -57,8 +63,8 @@ export default function Menu() {
         <div className="fixed inset-0 z-40 bg-black/60 flex items-end" onClick={() => setShowForm(false)}>
           <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-4 animate-slide-up" onClick={e => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editItem ? 'Редактировать блюдо' : 'Новое блюдо'}</h3>
-            <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
-            <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽)</label><input type="number" value={formPrice} onChange={e => setFormPrice(e.target.value)} min={0} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+            <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Название *</label><input type="text" value={formName} onChange={e => { setFormName(e.target.value); setFormErrors(p => ({ ...p, name: undefined })) }} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.name ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}</div>
+            <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (₽) *</label><input type="number" value={formPrice} onChange={e => { setFormPrice(e.target.value); setFormErrors(p => ({ ...p, price: undefined })) }} min={0} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.price ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.price && <p className="text-red-500 text-xs mt-1">{formErrors.price}</p>}</div>
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
               <div className="grid grid-cols-2 gap-2">{(Object.entries(CATEGORY_LABELS) as [MenuCategory, string][]).map(([val, label]) => (<button key={val} onClick={() => setFormCategory(val)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>

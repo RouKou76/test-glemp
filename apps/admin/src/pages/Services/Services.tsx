@@ -17,8 +17,10 @@ export default function Services() {
   function openAdd() { setEditService(null); setFormName(''); setFormPrice(''); setFormIcon(''); setFormRole('admin'); setFormFields(DEFAULT_FIELDS); setShowForm(true) }
   function openEdit(service: Service) { setEditService(service); setFormName(service.name); setFormPrice(service.price ?? ''); setFormIcon(service.icon ?? ''); setFormRole(service.assignedTo); setFormFields({ desiredAt: service.fields.desiredAt ?? { enabled: false }, location: service.fields.location ?? { enabled: false }, catalog: service.fields.catalog ?? { enabled: false }, geo: service.fields.geo ?? { enabled: false }, guestCount: service.fields.guestCount ?? { enabled: false }, comment: service.fields.comment ?? { enabled: false } }); setShowForm(true) }
   function toggleField(key: keyof ServiceFieldConfig) { setFormFields(prev => ({ ...prev, [key]: { ...prev[key], enabled: !prev[key].enabled } })) }
+  const [formErrors, setFormErrors] = useState<{ name?: string }>({})
   function handleSave() {
-    if (!formName.trim()) return
+    if (!formName.trim()) { setFormErrors({ name: 'Введите название' }); return }
+    setFormErrors({})
     if (editService) { setServices(prev => prev.map(s => s.id === editService.id ? { ...s, name: formName.trim(), price: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, fields: formFields } : s)) }
     else { setServices(prev => [...prev, { id: `cs-${Date.now()}`, name: formName.trim(), price: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, fields: formFields }]) }
     setShowForm(false)
@@ -55,7 +57,7 @@ export default function Services() {
         <div className="fixed inset-0 z-40 bg-black/60 flex items-end" onClick={() => setShowForm(false)}>
           <div className="w-full bg-gray-50 dark:bg-[#1a1d27] rounded-t-3xl p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-slide-up" onClick={e => e.stopPropagation()}>
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editService ? 'Редактировать услугу' : 'Новая услуга'}</h3>
-            <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+            <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Название *</label><input type="text" value={formName} onChange={e => { setFormName(e.target.value); setFormErrors({}) }} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.name ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}</div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="🚲" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
               <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена</label><input type="text" value={formPrice} onChange={e => setFormPrice(e.target.value)} placeholder="500 ₽ / час" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>

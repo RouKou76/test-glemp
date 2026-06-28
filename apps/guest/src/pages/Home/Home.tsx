@@ -11,39 +11,39 @@ const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; messa
   food: {
     title: 'Заказ питания',
     steps: [
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время подачи' },
-      { type: 'select', key: 'period', label: 'Приём пищи', options: [
+      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'time', key: 'time', label: 'Время подачи', required: true },
+      { type: 'select', key: 'period', label: 'Приём пищи', required: true, options: [
         { value: 'breakfast', label: '🌅 Завтрак' }, { value: 'lunch', label: '☀️ Обед' }, { value: 'dinner', label: '🌙 Ужин' },
       ]},
-      { type: 'select', key: 'location', label: 'Место подачи', options: [
+      { type: 'select', key: 'location', label: 'Место подачи', required: true, options: [
         { value: 'cabin', label: '🏠 В домик' }, { value: 'terrace', label: '🌿 На террасу' }, { value: 'gazebo', label: '⛺ В беседку' },
       ]},
-      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar') },
+      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar'), required: true },
     ],
     message: 'Заказ еды оформлен',
   },
   minibar: {
     title: 'Пополнение мини-бара',
     steps: [
-      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar') },
+      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar'), required: true },
     ],
     message: 'Заказ из минибара оформлен',
   },
   transfer: {
     title: 'Трансфер',
     steps: [
-      { type: 'select', key: 'destination', label: 'Направление', options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время подачи' },
+      { type: 'select', key: 'destination', label: 'Направление', required: true, options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
+      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'time', key: 'time', label: 'Время подачи', required: true },
     ],
     message: 'Трансфер заказан',
   },
   cleaning: {
     title: 'Заказ уборки',
     steps: [
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время уборки' },
+      { type: 'date', key: 'date', label: 'Дата', required: true },
+      { type: 'time', key: 'time', label: 'Время уборки', required: true },
     ],
     message: 'Клининг запланирован',
   },
