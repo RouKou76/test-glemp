@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { mockMessages } from '@glamping/utils'
 import type { Message } from '@glamping/types'
+import { ThemeToggle } from '@glamping/ui'
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>(mockMessages.filter(m => m.houseId === 'h1'))
@@ -36,8 +37,9 @@ export default function Chat() {
               <span className={`text-base mt-2 block ${m.sender === 'guest' ? 'text-glamp-200' : 'text-gray-500 dark:text-gray-400'}`}>
                 {new Date(m.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </span>
-            </div>
-          </div>
+        </div>
+        <div className="ml-auto"><ThemeToggle /></div>
+      </div>
         ))}
         <div ref={endRef} />
       </div>

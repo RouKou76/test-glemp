@@ -1,8 +1,11 @@
+import { ThemeToggle } from '@glamping/ui'
+
 export default function Info() {
   return (
     <div className="p-8 animate-slide-up">
-      <div className="mb-8">
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Eco Glamp "Forest Haven"</h1>
+        <ThemeToggle />
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-8">

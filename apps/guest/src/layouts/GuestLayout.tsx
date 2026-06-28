@@ -1,5 +1,4 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { ThemeToggle } from '@glamping/ui'
 
 export default function GuestLayout() {
   return (
@@ -7,10 +6,6 @@ export default function GuestLayout() {
       <main className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </main>
-
-      <div className="fixed top-4 right-4 z-40">
-        <ThemeToggle />
-      </div>
 
       <nav className="fixed bottom-0 w-full h-24 bg-white dark:bg-[#1a1d27] border-t border-gray-200 dark:border-white/10 flex justify-around items-center px-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-none z-30 transition-colors">
         <NavLink to="/info" className={({ isActive }) => `flex flex-col items-center justify-center w-24 gap-1 transition-colors ${isActive ? 'text-glamp-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>

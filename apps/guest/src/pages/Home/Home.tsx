@@ -4,6 +4,7 @@ import type { Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
 import { OrderForm, type OrderStep } from './OrderForm'
+import { ThemeToggle } from '@glamping/ui'
 
 const SERVICE_COLORS: Record<string, string> = { cs1: 'bg-amber-500', cs2: 'bg-emerald-500' }
 
@@ -80,8 +81,11 @@ export default function Home() {
 
   return (
     <div className="p-8">
-      <h1 className="text-lg font-bold text-gray-800 dark:text-white mb-2">Заказ услуг</h1>
-      <p className="text-gray-500 dark:text-white/60 mb-8">Домик №1</p>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Заказ услуг</h1>
+        <ThemeToggle />
+      </div>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">Домик №1</p>
 
       <div className="grid grid-cols-2 gap-6 animate-slide-up">
         <ServiceTile icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>} label="Заказ питания" color="bg-orange-500" onClick={() => setActiveModal('food')} />
