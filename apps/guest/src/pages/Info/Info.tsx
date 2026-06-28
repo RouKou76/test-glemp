@@ -9,9 +9,9 @@ export default function Info() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Eco Glamp "Forest Haven"</h1>
         <button onClick={toggle} className="p-2 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-white/20 transition-colors">
           {theme === 'light' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
           )}
         </button>
       </div>
@@ -30,7 +30,7 @@ export default function Info() {
 
       <div className="bg-white dark:bg-[#1a1d27] p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-white/10 mb-8 transition-colors">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">О нас</h2>
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-xl">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-xl">
           Добро пожаловать в наш глэмпинг! Здесь вы сможете насладиться природой без отрыва от комфорта.
           Наша команда всегда готова помочь вам. Обратите внимание, что заказ еды необходимо делать минимум за 1 час.
         </p>
@@ -38,7 +38,7 @@ export default function Info() {
 
       <div className="bg-glamp-50 dark:bg-glamp-900/30 p-8 rounded-3xl border border-glamp-100 dark:border-glamp-500/20 transition-colors">
         <h2 className="text-2xl font-bold text-glamp-900 dark:text-glamp-100 mb-4">Наши услуги</h2>
-        <p className="text-glamp-800 dark:text-glamp-200 leading-relaxed text-xl">
+        <p className="text-glamp-800 dark:text-gray-300 leading-relaxed text-xl">
           Мы предоставляем: питание по меню, услуги трансфера, уборку домиков, пополнение мини-бара и свежие полотенца по запросу.
         </p>
       </div>
