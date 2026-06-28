@@ -29,7 +29,7 @@ export default function Chat() {
         <div className="ml-auto shrink-0"><ThemeToggle /></div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-[#0f1117] transition-colors">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-glamp-50 dark:bg-[#0f1117] transition-colors">
         {messages.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400 text-base mt-10">Начните диалог с администратором</p>}
         {messages.map(m => (
           <div key={m.id} className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}>
