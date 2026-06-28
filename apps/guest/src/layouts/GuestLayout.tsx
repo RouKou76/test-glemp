@@ -1,9 +1,13 @@
 import { Outlet, NavLink } from 'react-router-dom'
+import { ThemeToggle } from '@glamping/ui'
 
 export default function GuestLayout() {
   return (
-    <div className="flex flex-col h-screen bg-glamp-400 dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 overflow-hidden transition-colors">
-      <main className="flex-1 overflow-y-auto pb-24">
+    <div className="flex flex-col h-screen bg-glamp-50 dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 overflow-hidden transition-colors">
+      <main className="flex-1 overflow-y-auto pb-24 relative">
+        <div className="fixed top-4 right-4 z-40">
+          <ThemeToggle />
+        </div>
         <Outlet />
       </main>
 
