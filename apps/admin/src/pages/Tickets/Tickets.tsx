@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { mockTickets, mockHouses, mockTransferDestinations } from '@glamping/utils'
 import type { Ticket, TicketStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
@@ -118,6 +118,13 @@ export default function Tickets() {
       return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
     })
   }, [tickets, statusFilter, typeFilter])
+
+  useEffect(() => {
+    if (expandedId === null) {
+      const firstFood = filtered.find(t => t.type === 'food')
+      if (firstFood) setExpandedId(firstFood.id)
+    }
+  }, [filtered])
 
   const newCount = tickets.filter(t => t.status === 'new').length
 
