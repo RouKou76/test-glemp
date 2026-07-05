@@ -92,7 +92,7 @@ export default function Tickets() {
   const [tickets, setTickets] = useState<Ticket[]>(mockTickets.filter(t => t.type !== 'gates'))
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
 
@@ -102,7 +102,7 @@ export default function Tickets() {
 
   function handleArchive(id: string) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'archived' } : t))
-    setExpandedId(null)
+    setExpandedIds(prev => { const n = new Set(prev); n.delete(id); return n })
   }
 
   const filtered = useMemo(() => {
@@ -120,9 +120,9 @@ export default function Tickets() {
   }, [tickets, statusFilter, typeFilter])
 
   useEffect(() => {
-    if (expandedId === null) {
-      const firstFood = filtered.find(t => t.type === 'food')
-      if (firstFood) setExpandedId(firstFood.id)
+    if (expandedIds.size === 0) {
+      const foodIds = new Set(filtered.filter(t => t.type === 'food').map(t => t.id))
+      if (foodIds.size > 0) setExpandedIds(foodIds)
     }
   }, [filtered])
 
@@ -166,13 +166,13 @@ export default function Tickets() {
             const mainContent = getMainContent(ticket)
             const extraInfo = getExtraInfo(ticket)
             const urgency = getUrgency(ticket.desiredAt)
-            const isExpanded = expandedId === ticket.id
+            const isExpanded = expandedIds.has(ticket.id)
             const nextStatus = NEXT_STATUS[ticket.status]
             const nextLabel = NEXT_LABEL[ticket.status]
 
             return (
               <div key={ticket.id}
-                onClick={() => setExpandedId(isExpanded ? null : ticket.id)}
+                onClick={() => setExpandedIds(prev => { const n = new Set(prev); isExpanded ? n.delete(ticket.id) : n.add(ticket.id); return n })}
                 className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-all cursor-pointer active:scale-[0.98]">
 
                 {/* Шапка */}
@@ -233,14 +233,14 @@ export default function Tickets() {
                   <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-white/10 space-y-3">
                     {ticket.items && ticket.items.length > 0 && (
                       <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider">Состав</p>
+                        <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
                         {ticket.items.map(item => (
-                          <div key={item.menuItemId} className="flex justify-between text-xs text-gray-700 dark:text-white/70">
+                          <div key={item.menuItemId} className="flex justify-between text-sm text-gray-800 dark:text-white">
                             <span>• {item.name} ×{item.quantity}</span>
                             <span>{item.price * item.quantity} ₽</span>
                           </div>
                         ))}
-                        <div className="flex justify-between text-xs font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
+                        <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
                           <span>Итого</span>
                           <span>{ticket.items.reduce((s, i) => s + i.price * i.quantity, 0)} ₽</span>
                         </div>
