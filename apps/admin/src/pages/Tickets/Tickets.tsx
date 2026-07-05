@@ -193,8 +193,8 @@ export default function Tickets() {
                   <span className="text-[11px] text-gray-400 dark:text-white/30">Заказано в {formatCreationTime(ticket.sentAt)}</span>
                 </div>
 
-                {/* Основная информация */}
-                {mainContent.items.length > 0 && (
+                {/* Основная информация — только для не-еды */}
+                {ticket.type !== 'food' && mainContent.items.length > 0 && (
                   <div className="px-4 pb-1">
                     {mainContent.title && <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-0.5">{mainContent.title}</p>}
                     <div className="space-y-0">
