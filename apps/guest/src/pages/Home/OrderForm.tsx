@@ -229,18 +229,20 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'menu') return (
               <div key={s.key}>
-                <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-3 block">Меню{s.required && ' *'}</label>
-                <div className="space-y-3">
+                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">Меню{s.required && ' *'}</label>
+                <div className="space-y-2">
                   {s.items.filter(i => !i.hidden).map(item => (
-                    <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 shadow-sm items-center gap-4">
+                    <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
                       <div className="flex-1">
-                        <h4 className="font-bold text-gray-800 dark:text-white text-lg leading-tight">{item.name}</h4>
-                        {item.showPrice && <p className="text-sm text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>}
+                        <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
+                        {item.showPrice && <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>}
                       </div>
-                      <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 rounded-xl p-1 border border-gray-200 dark:border-white/10">
-                        <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]} className="w-10 h-10 flex justify-center items-center rounded-lg bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-lg active:scale-95 disabled:opacity-30 transition-all">−</button>
-                        <span className="w-6 text-center font-bold text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
-                        <button onClick={() => setQty(item.id, +1)} className="w-10 h-10 flex justify-center items-center rounded-lg bg-glamp-600 text-white shadow-sm font-bold text-lg active:scale-95 transition-all">+</button>
+                      <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
+                        <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
+                          className="w-8 h-8 flex justify-center items-center rounded-md bg-white dark:bg-white/10 shadow-sm text-gray-600 dark:text-white/60 font-bold text-base active:scale-95 disabled:opacity-30 transition-all">−</button>
+                        <span className="w-5 text-center font-bold text-sm text-gray-800 dark:text-white">{cart[item.id] ?? 0}</span>
+                        <button onClick={() => setQty(item.id, +1)}
+                          className="w-8 h-8 flex justify-center items-center rounded-md bg-glamp-600 text-white shadow-sm font-bold text-base active:scale-95 transition-all">+</button>
                       </div>
                     </div>
                   ))}

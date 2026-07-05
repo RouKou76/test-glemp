@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { mockTickets, mockHouses } from '@glamping/utils'
+import { mockTickets, mockHouses, mockTransferDestinations } from '@glamping/utils'
 import type { Ticket, TicketStatus, TicketType } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
@@ -9,6 +9,10 @@ type FilterType = TicketType | 'all'
 const TYPE_LABELS: Record<string, string> = {
   food: '🍔 Еда', minibar: '🍷 Минибар', transfer: '🚗 Трансфер',
   cleaning: '✨ Клининг', towels: '🧺 Полотенца', gates: '🚪 Ворота', custom: '⚡ Услуга',
+}
+
+const LOCATION_LABELS: Record<string, string> = {
+  cabin: '🏠 В домик', terrace: '🌿 На террасу', gazebo: '⛺ В беседку',
 }
 
 const NEXT_STATUS: Partial<Record<TicketStatus, TicketStatus>> = { new: 'accepted', accepted: 'in_progress', in_progress: 'done' }
@@ -87,8 +91,8 @@ export default function Tickets() {
                 )}
                 <div className="space-y-1 text-xs text-gray-500 dark:text-white/50 my-2">
                   {desiredAt && <p>⏱ Желаемое время: <span className="text-gray-600 dark:text-white/60">{desiredAt}</span></p>}
-                  {ticket.location && <p>📍 Место: <span className="text-gray-600 dark:text-white/60">{ticket.location}</span></p>}
-                  {ticket.geo && <p>🗺 Направление: <span className="text-gray-600 dark:text-white/60">{ticket.geo}</span></p>}
+                  {ticket.location && <p>📍 Место: <span className="text-gray-600 dark:text-white/60">{LOCATION_LABELS[ticket.location] ?? ticket.location}</span></p>}
+                  {ticket.geo && <p>🗺 Направление: <span className="text-gray-600 dark:text-white/60">{mockTransferDestinations.find(d => d.id === ticket.geo)?.name ?? ticket.geo}</span></p>}
                   {ticket.description && <p>💬 <span className="text-gray-600 dark:text-white/60">{ticket.description}</span></p>}
                 </div>
                 <div className="flex justify-between items-center border-t border-gray-100 dark:border-white/10 pt-3 mt-2">
