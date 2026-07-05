@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
 import { mockTickets, mockHouses, mockTransferDestinations } from '@glamping/utils'
-import type { Ticket, TicketStatus, TicketType } from '@glamping/types'
+import type { Ticket, TicketStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
-import { ConfirmDialog } from '@glamping/ui'
+import { Modal } from '@glamping/ui'
 
 type FilterStatus = TicketStatus | 'all'
-type FilterType = TicketType | 'all'
+type FilterType = string | 'all'
 
 const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
   food: { icon: '🍽', label: 'Питание' },
@@ -25,25 +25,53 @@ const STATUS_COLORS: Record<string, string> = {
   new: 'bg-orange-500', accepted: 'bg-blue-500', in_progress: 'bg-purple-500', done: 'bg-green-500',
 }
 
-function formatTime(iso: string): string {
+const STATUS_LABELS: Record<string, string> = {
+  new: 'Новая', accepted: 'Принята', in_progress: 'В работе', done: 'Готово',
+}
+
+function formatCreationTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDesiredTime(iso: string): string {
   const d = new Date(iso)
   const now = new Date()
   const isToday = d.toDateString() === now.toDateString()
   const time = d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
-  return isToday ? time : d.toLocaleDateString('ru', { day: '2-digit', month: 'short' }) + ' ' + time
+  if (isToday) return `Сегодня, ${time}`
+  return d.toLocaleDateString('ru', { day: '2-digit', month: 'long' }) + ', ' + time
+}
+
+function getDesiredTimeLabel(type: string): string {
+  switch (type) {
+    case 'food': return 'Подать в'
+    case 'transfer': return 'Выезд в'
+    case 'cleaning': return 'Уборка'
+    default: return 'Время'
+  }
+}
+
+function getUrgency(desiredAt?: string): { color: string; label: string; sort: number } {
+  if (!desiredAt) return { color: '', label: '', sort: 999 }
+  const now = new Date()
+  const target = new Date(desiredAt)
+  const diffMin = (target.getTime() - now.getTime()) / 60000
+
+  if (diffMin < 0) return { color: 'text-red-500 font-bold', label: 'Просрочено', sort: 0 }
+  if (diffMin < 15) return { color: 'text-orange-500 font-bold', label: `${Math.round(diffMin)} мин`, sort: 1 }
+  return { color: 'text-gray-800 dark:text-white', label: '', sort: 2 }
 }
 
 function getMainContent(ticket: Ticket): { title: string; items: string[] } {
   switch (ticket.type) {
-    case 'food':
-      return { title: 'Заказ', items: ticket.items?.map(i => `${i.name} ×${i.quantity}`) ?? [] }
+    case 'food': return { title: 'Заказ', items: ticket.items?.map(i => `${i.name} ×${i.quantity}`) ?? [] }
     case 'transfer': {
       const dest = mockTransferDestinations.find(d => d.id === ticket.geo)
       return { title: 'Адрес', items: dest ? [dest.name] : [ticket.geo ?? ''] }
     }
     case 'cleaning': return { title: '', items: ['Полная уборка домика'] }
     case 'towels': return { title: '', items: ['Замена полотенец'] }
-    case 'minibar': return { title: '', items: ['Пополнение минибара'] }
+    case 'minibar': return { title: '', items: ['Пополнение минибар'] }
     case 'custom': return { title: '', items: [ticket.description ?? 'Заявка'] }
     default: return { title: '', items: [] }
   }
@@ -51,31 +79,46 @@ function getMainContent(ticket: Ticket): { title: string; items: string[] } {
 
 function getExtraInfo(ticket: Ticket): string[] {
   const info: string[] = []
-  if (ticket.desiredAt) {
-    const t = new Date(ticket.desiredAt)
-    info.push(`🕒 ${t.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}`)
-  }
   if (ticket.location) info.push(`📍 ${LOCATION_LABELS[ticket.location] ?? ticket.location}`)
   if (ticket.guestCount) info.push(`👤 ${ticket.guestCount} чел.`)
   if (ticket.description && ticket.type !== 'custom') info.push(`💬 ${ticket.description}`)
   return info
 }
 
+const NEXT_STATUS: Record<string, TicketStatus> = { new: 'accepted', accepted: 'in_progress', in_progress: 'done' }
+const NEXT_LABEL: Record<string, string> = { new: 'Принять', accepted: 'В работу', in_progress: 'Готово' }
+
 export default function Tickets() {
   const [tickets, setTickets] = useState<Ticket[]>(mockTickets.filter(t => t.type !== 'gates'))
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [actionTicket, setActionTicket] = useState<Ticket | null>(null)
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
-  function handleStatusChange(id: string, status: TicketStatus) { setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t)); setActionTicket(null) }
 
-  const filtered = useMemo(() => tickets.filter(t => {
-    const matchStatus = statusFilter === 'all' || t.status === statusFilter
-    const matchType = typeFilter === 'all' || t.type === typeFilter
-    return matchStatus && matchType && t.status !== 'archived'
-  }), [tickets, statusFilter, typeFilter])
+  function handleStatusChange(id: string, status: TicketStatus) {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
+    setSelectedTicket(prev => prev && prev.id === id ? { ...prev, status } : prev)
+  }
+
+  function handleArchive(id: string) {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'archived' } : t))
+    setSelectedTicket(null)
+  }
+
+  const filtered = useMemo(() => {
+    const result = tickets.filter(t => {
+      const matchStatus = statusFilter === 'all' || t.status === statusFilter
+      const matchType = typeFilter === 'all' || t.type === typeFilter
+      return matchStatus && matchType && t.status !== 'archived'
+    })
+    return result.sort((a, b) => {
+      const urgA = getUrgency(a.desiredAt)
+      const urgB = getUrgency(b.desiredAt)
+      if (urgA.sort !== urgB.sort) return urgA.sort - urgB.sort
+      return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+    })
+  }, [tickets, statusFilter, typeFilter])
 
   const newCount = tickets.filter(t => t.status === 'new').length
 
@@ -116,12 +159,12 @@ export default function Tickets() {
             const houseNumber = getHouseNumber(ticket.houseId)
             const mainContent = getMainContent(ticket)
             const extraInfo = getExtraInfo(ticket)
-            const isExpanded = expandedId === ticket.id
-            const nextStatusMap: Record<string, TicketStatus> = { new: 'accepted', accepted: 'in_progress', in_progress: 'done' }
-            const nextStatus = nextStatusMap[ticket.status]
+            const urgency = getUrgency(ticket.desiredAt)
 
             return (
-              <div key={ticket.id} className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-colors">
+              <div key={ticket.id}
+                onClick={() => setSelectedTicket(ticket)}
+                className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-colors cursor-pointer active:scale-[0.98]">
                 {/* Шапка */}
                 <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -131,65 +174,128 @@ export default function Tickets() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/50 text-[10px] font-bold px-2 py-0.5 rounded">#{houseNumber}</span>
                     <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[ticket.status] ?? 'bg-gray-400'}`}></span>
-                    <span className="text-[10px] font-bold text-gray-600 dark:text-white/50 uppercase">{ticket.status === 'new' ? 'Новая' : ticket.status === 'accepted' ? 'Принята' : ticket.status === 'in_progress' ? 'В работе' : 'Готово'}</span>
+                    <span className="text-[10px] font-bold text-gray-600 dark:text-white/50 uppercase">{STATUS_LABELS[ticket.status] ?? ticket.status}</span>
                   </div>
                 </div>
 
-                {/* Время */}
-                <div className="px-4 pb-2">
-                  <span className="text-[11px] text-gray-400 dark:text-white/30">{formatTime(ticket.sentAt)}</span>
+                {/* Время создания (мелкое, серое) */}
+                <div className="px-4 pb-1">
+                  <span className="text-[10px] text-gray-400 dark:text-white/25">{formatCreationTime(ticket.sentAt)}</span>
                 </div>
 
                 {/* Основная информация */}
                 {mainContent.items.length > 0 && (
-                  <div className="px-4 pb-2">
-                    {mainContent.title && <p className="text-[11px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-1">{mainContent.title}</p>}
-                    <div className="space-y-0.5">
+                  <div className="px-4 pb-1">
+                    {mainContent.title && <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-0.5">{mainContent.title}</p>}
+                    <div className="space-y-0">
                       {mainContent.items.map((item, i) => (
-                        <p key={i} className="text-sm font-medium text-gray-800 dark:text-white">{item}</p>
+                        <p key={i} className="text-sm font-medium text-gray-800 dark:text-white leading-tight">{item}</p>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Доп. информация */}
-                {extraInfo.length > 0 && (
-                  <div className="px-4 pb-2 flex flex-wrap gap-x-4 gap-y-1">
-                    {extraInfo.map((info, i) => (
-                      <span key={i} className="text-xs text-gray-500 dark:text-white/40">{info}</span>
-                    ))}
+                {/* Время выполнения — приоритет */}
+                {ticket.desiredAt && (
+                  <div className="px-4 py-1.5">
+                    <span className={`text-sm font-semibold ${urgency.color}`}>
+                      🕒 {getDesiredTimeLabel(ticket.type)} {formatDesiredTime(ticket.desiredAt)}
+                    </span>
+                    {urgency.label && <span className={`ml-2 text-xs ${urgency.color}`}>{urgency.label}</span>}
                   </div>
                 )}
 
-                {/* Кнопка */}
-                <div className="px-4 pb-3 pt-1">
-                  {isExpanded ? (
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        {nextStatus && (
-                          <button onClick={() => handleStatusChange(ticket.id, nextStatus)}
-                            className={`py-2 rounded-lg text-xs font-bold text-white ${ticket.status === 'new' ? 'bg-amber-500' : ticket.status === 'accepted' ? 'bg-blue-500' : 'bg-green-500'}`}>
-                            {nextStatus === 'accepted' ? 'Принять' : nextStatus === 'in_progress' ? 'В работу' : 'Готово'}
-                          </button>
-                        )}
-                        <button onClick={() => setExpandedId(null)}
-                          className="py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
-                          Свернуть
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button onClick={() => setExpandedId(isExpanded ? null : ticket.id)}
-                      className="w-full py-2 rounded-lg text-xs font-medium text-gray-500 dark:text-white/40 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-                      Открыть заявку
-                    </button>
-                  )}
-                </div>
+                {/* Доп. информация */}
+                {extraInfo.length > 0 && (
+                  <div className="px-4 pb-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                    {extraInfo.map((info, i) => (
+                      <span key={i} className="text-[11px] text-gray-500 dark:text-white/40">{info}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
       )}
+
+      {/* Экран деталей заявки */}
+      {selectedTicket && (() => {
+        const t = selectedTicket
+        const config = TYPE_CONFIG[t.type] ?? { icon: '📋', label: 'Заявка' }
+        const houseNumber = getHouseNumber(t.houseId)
+        const mainContent = getMainContent(t)
+        const urgency = getUrgency(t.desiredAt)
+        const nextStatus = NEXT_STATUS[t.status]
+        const nextLabel = NEXT_LABEL[t.status]
+
+        return (
+          <Modal open={!!selectedTicket} onClose={() => setSelectedTicket(null)} title={`${config.icon} ${config.label}`}>
+            <div className="p-5 space-y-4">
+              {/* Шапка */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/50 text-xs font-bold px-2 py-1 rounded">Домик #{houseNumber}</span>
+                  <Badge status={t.status} />
+                </div>
+                <span className="text-xs text-gray-400 dark:text-white/30">{formatCreationTime(t.sentAt)}</span>
+              </div>
+
+              {/* Основная информация */}
+              {mainContent.items.length > 0 && (
+                <div>
+                  {mainContent.title && <p className="text-xs font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-1">{mainContent.title}</p>}
+                  <div className="space-y-1">
+                    {mainContent.items.map((item, i) => (
+                      <p key={i} className="text-sm font-medium text-gray-800 dark:text-white">{item}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Время выполнения */}
+              {t.desiredAt && (
+                <div className={`p-3 rounded-xl ${urgency.color.includes('red') ? 'bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20' : urgency.color.includes('orange') ? 'bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20' : 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10'}`}>
+                  <span className={`text-sm font-semibold ${urgency.color}`}>
+                    🕒 {getDesiredTimeLabel(t.type)} {formatDesiredTime(t.desiredAt)}
+                  </span>
+                  {urgency.label && <span className={`ml-2 text-xs ${urgency.color}`}>{urgency.label}</span>}
+                </div>
+              )}
+
+              {/* Все детали */}
+              <div className="space-y-1 text-xs text-gray-500 dark:text-white/40">
+                {t.location && <p>📍 {LOCATION_LABELS[t.location] ?? t.location}</p>}
+                {t.guestCount && <p>👤 {t.guestCount} чел.</p>}
+                {t.description && <p>💬 {t.description}</p>}
+                {t.items && t.items.length > 0 && t.items.map(item => (
+                  <p key={item.menuItemId}>• {item.name} ×{item.quantity} — {item.price * item.quantity} ₽</p>
+                ))}
+              </div>
+
+              {/* Действия */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                {nextStatus && (
+                  <button onClick={() => handleStatusChange(t.id, nextStatus)}
+                    className={`py-3 rounded-xl text-sm font-bold text-white ${t.status === 'new' ? 'bg-amber-500' : t.status === 'accepted' ? 'bg-blue-500' : 'bg-green-500'}`}>
+                    {nextLabel}
+                  </button>
+                )}
+                {t.status === 'done' && (
+                  <button onClick={() => handleArchive(t.id)}
+                    className="py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
+                    В архив
+                  </button>
+                )}
+                <button onClick={() => setSelectedTicket(null)}
+                  className="py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )
+      })()}
     </div>
   )
 }
