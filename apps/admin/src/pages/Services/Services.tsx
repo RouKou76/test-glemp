@@ -3,8 +3,8 @@ import { mockServices } from '@glamping/utils'
 import type { Service, AssignedRole, ServiceFieldConfig } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
-const ROLE_LABELS: Record<AssignedRole, string> = { cook: '👨‍🍳 Повар', cleaning: '🧹 Клининг', driver: '🚗 Водитель', admin: '👤 Администратор' }
-const FIELD_LABELS: Record<keyof ServiceFieldConfig, string> = { desiredAt: '⏱ Время', location: '📍 Место', catalog: '📋 Каталог', geo: '🗺 Адрес', guestCount: '👥 Персоны', comment: '💬 Комментарий' }
+const ROLE_LABELS: Record<AssignedRole, string> = { cook: 'Повар', cleaning: 'Клининг', driver: 'Водитель', admin: 'Администратор' }
+const FIELD_LABELS: Record<keyof ServiceFieldConfig, string> = { desiredAt: 'Время', location: 'Место', catalog: 'Каталог', geo: 'Адрес', guestCount: 'Персоны', comment: 'Комментарий' }
 type ServiceFields = Required<ServiceFieldConfig>
 const DEFAULT_FIELDS: ServiceFields = { desiredAt: { enabled: false }, location: { enabled: false }, catalog: { enabled: false }, geo: { enabled: false }, guestCount: { enabled: false }, comment: { enabled: false } }
 
@@ -36,19 +36,24 @@ export default function Services() {
         <button onClick={openAdd} className="px-4 py-2 bg-glamp-600 text-white text-xs font-bold rounded-xl hover:bg-glamp-700 transition-colors active:scale-95">+ Добавить</button>
       </div>
       <div className="space-y-3">
-        {services.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">⚡</p><p className="text-sm">Нет услуг</p></div>) : services.map(service => (
+        {services.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3 text-gray-300 dark:text-white/10"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><p className="text-sm">Нет услуг</p></div>) : services.map(service => (
           <div key={service.id} className={`bg-white dark:bg-[#1a1d27] border rounded-2xl p-4 space-y-3 shadow-sm transition-opacity ${service.active ? 'border-gray-100 dark:border-white/10' : 'border-gray-100 dark:border-white/5 opacity-50'}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{service.icon ?? '⚡'}</span>
+                <span className="text-2xl">{service.icon || '⭐'}</span>
                 <div><p className="text-sm font-bold text-gray-800 dark:text-white">{service.name}</p><p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{service.price ?? 'Цена не указана'} · {ROLE_LABELS[service.assignedTo]}</p></div>
               </div>
               <button onClick={() => toggleActive(service.id)} className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${service.active ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${service.active ? 'left-6' : 'left-1'}`} /></button>
             </div>
             {Object.entries(service.fields).filter(([, f]) => f?.enabled).map(([key, f]) => (<div key={key} className="text-xs text-gray-500 dark:text-white/60 flex items-center gap-2"><span>{FIELD_LABELS[key as keyof ServiceFieldConfig]}</span>{f?.label && <span className="text-gray-400 dark:text-white/20">→ «{f.label}»</span>}</div>))}
             <div className="flex gap-2 pt-1">
-              <button onClick={() => openEdit(service)} className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-xs font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">✏️ Редактировать</button>
-              <button onClick={() => setDeleteId(service.id)} className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">🗑</button>
+              <button onClick={() => openEdit(service)} className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-xs font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                Редактировать
+              </button>
+              <button onClick={() => setDeleteId(service.id)} className="px-4 py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-400 dark:text-red-400/60 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              </button>
             </div>
           </div>
         ))}
@@ -59,7 +64,7 @@ export default function Services() {
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editService ? 'Редактировать услугу' : 'Новая услуга'}</h3>
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Название *</label><input type="text" value={formName} onChange={e => { setFormName(e.target.value); setFormErrors({}) }} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.name ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}</div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="🚲" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+              <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="⭐" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
               <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена</label><input type="text" value={formPrice} onChange={e => setFormPrice(e.target.value)} placeholder="500 ₽ / час" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
             </div>
             <div>

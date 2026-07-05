@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-interface InfoContent { wifi: string; rules: string; description: string }
-const INITIAL: InfoContent = { wifi: 'Glamp_Guest / forest2026', rules: '• Тихий час с 23:00 до 8:00\n• Курение только в отведённых местах\n• Выезд до 12:00', description: 'Глэмпинг расположен в 45 км от Суздаля. На территории: баня, беседки, рыбалка.' }
+interface InfoContent { wifiName: string; wifiPassword: string; rules: string; description: string }
+const INITIAL: InfoContent = { wifiName: 'Glamp_Guest', wifiPassword: 'forest2026', rules: '• Тихий час с 23:00 до 8:00\n• Курение только в отведённых местах\n• Выезд до 12:00', description: 'Глэмпинг расположен в 45 км от Суздаля. На территории: баня, беседки, рыбалка.' }
 
 export default function InfoEditor() {
   const [saved, setSaved] = useState<InfoContent>(INITIAL)
   const [draft, setDraft] = useState<InfoContent>(INITIAL)
   const [success, setSuccess] = useState(false)
-  const isDirty = draft.wifi !== saved.wifi || draft.rules !== saved.rules || draft.description !== saved.description
+  const isDirty = draft.wifiName !== saved.wifiName || draft.wifiPassword !== saved.wifiPassword || draft.rules !== saved.rules || draft.description !== saved.description
   function handleSave() { setSaved(draft); setSuccess(true); setTimeout(() => setSuccess(false), 2500) }
   function handleReset() { setDraft(saved) }
 
@@ -21,7 +21,8 @@ export default function InfoEditor() {
         <p className="text-xs text-gray-500 dark:text-white/50 mt-1">Отображается в разделе «Инфо» на планшете гостя</p>
       </div>
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-5">
-        <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 uppercase tracking-wider mb-2 block">Пароль Wi-Fi</label><input type="text" value={draft.wifi} onChange={e => setDraft(p => ({ ...p, wifi: e.target.value }))} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+        <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 uppercase tracking-wider mb-2 block">Название Wi-Fi</label><input type="text" value={draft.wifiName} onChange={e => setDraft(p => ({ ...p, wifiName: e.target.value }))} placeholder="SSID сети" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+        <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 uppercase tracking-wider mb-2 block">Пароль Wi-Fi</label><input type="text" value={draft.wifiPassword} onChange={e => setDraft(p => ({ ...p, wifiPassword: e.target.value }))} placeholder="Пароль" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
         <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 uppercase tracking-wider mb-2 block">Правила проживания</label><textarea value={draft.rules} onChange={e => setDraft(p => ({ ...p, rules: e.target.value }))} rows={5} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" /></div>
         <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 uppercase tracking-wider mb-2 block">Описание территории</label><textarea value={draft.description} onChange={e => setDraft(p => ({ ...p, description: e.target.value }))} rows={4} className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 resize-none" /></div>
       </div>

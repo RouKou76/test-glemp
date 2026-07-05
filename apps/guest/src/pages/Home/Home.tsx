@@ -15,10 +15,10 @@ const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; messa
       { type: 'date', key: 'date', label: 'Дата' },
       { type: 'time', key: 'time', label: 'Время подачи', required: true },
       { type: 'select', key: 'period', label: 'Приём пищи', required: true, options: [
-        { value: 'breakfast', label: '🌅 Завтрак' }, { value: 'lunch', label: '☀️ Обед' }, { value: 'dinner', label: '🌙 Ужин' },
+        { value: 'breakfast', label: 'Завтрак' }, { value: 'lunch', label: 'Обед' }, { value: 'dinner', label: 'Ужин' },
       ]},
       { type: 'select', key: 'location', label: 'Место подачи', required: true, options: [
-        { value: 'cabin', label: '🏠 В домик' }, { value: 'terrace', label: '🌿 На террасу' }, { value: 'gazebo', label: '⛺ В беседку' },
+        { value: 'cabin', label: 'В домик' }, { value: 'terrace', label: 'На террасу' }, { value: 'gazebo', label: 'В беседку' },
       ]},
       { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar'), required: true },
     ],
@@ -54,7 +54,7 @@ function buildServiceConfig(service: Service): { title: string; steps: OrderStep
   const steps: OrderStep[] = []
   if (service.fields.desiredAt?.enabled) steps.push({ type: 'time', key: 'time', label: service.fields.desiredAt.label || 'Желаемое время' })
   if (service.fields.location?.enabled) steps.push({ type: 'select', key: 'location', label: service.fields.location.label || 'Место', options: [
-    { value: 'cabin', label: '🏠 Домик' }, { value: 'terrace', label: '🌿 Терраса' }, { value: 'gazebo', label: '⛺ Беседка' },
+    { value: 'cabin', label: 'Домик' }, { value: 'terrace', label: 'Терраса' }, { value: 'gazebo', label: 'Беседка' },
   ]})
   if (service.fields.guestCount?.enabled) steps.push({ type: 'number', key: 'guestCount', label: service.fields.guestCount.label || 'Количество персон', min: 1, max: 20 })
   if (service.fields.catalog?.enabled && service.items) steps.push({ type: 'catalog', key: 'catalog', label: service.fields.catalog.label || 'Каталог', items: service.items })
@@ -106,7 +106,7 @@ export default function Home() {
         {activeServices.map(service => (
           <ServiceTile
             key={service.id}
-            icon={<span className="text-base">{service.icon ?? '✨'}</span>}
+            icon={<span className="text-base">{service.icon || '⭐'}</span>}
             label={service.name}
             sublabel={service.price}
             color={SERVICE_COLORS[service.id] ?? 'bg-gray-600'}
