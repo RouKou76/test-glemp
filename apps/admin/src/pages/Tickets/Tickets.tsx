@@ -2,23 +2,22 @@ import { useState, useMemo } from 'react'
 import { mockTickets, mockHouses, mockTransferDestinations } from '@glamping/utils'
 import type { Ticket, TicketStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
-import { Modal } from '@glamping/ui'
 
 type FilterStatus = TicketStatus | 'all'
 type FilterType = string | 'all'
 
-const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
-  food: { icon: '🍽', label: 'Питание' },
-  minibar: { icon: '🥤', label: 'Минибар' },
-  transfer: { icon: '🚗', label: 'Трансфер' },
-  cleaning: { icon: '🧹', label: 'Уборка' },
-  towels: { icon: '🧺', label: 'Полотенца' },
-  gates: { icon: '🚪', label: 'Ворота' },
-  custom: { icon: '⚡', label: 'Услуга' },
+const TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string }> = {
+  food: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>, label: 'Питание' },
+  minibar: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>, label: 'Минибар' },
+  transfer: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>, label: 'Трансфер' },
+  cleaning: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>, label: 'Уборка' },
+  towels: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></svg>, label: 'Полотенца' },
+  gates: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>, label: 'Ворота' },
+  custom: { icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>, label: 'Услуга' },
 }
 
 const LOCATION_LABELS: Record<string, string> = {
-  cabin: '🏠 В домик', terrace: '🌿 На террасу', gazebo: '⛺ В беседку',
+  cabin: 'В домик', terrace: 'На террасу', gazebo: 'В беседку',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -56,7 +55,6 @@ function getUrgency(desiredAt?: string): { color: string; label: string; sort: n
   const now = new Date()
   const target = new Date(desiredAt)
   const diffMin = (target.getTime() - now.getTime()) / 60000
-
   if (diffMin < 0) return { color: 'text-red-500 font-bold', label: 'Просрочено', sort: 0 }
   if (diffMin < 15) return { color: 'text-orange-500 font-bold', label: `${Math.round(diffMin)} мин`, sort: 1 }
   return { color: 'text-gray-800 dark:text-white', label: '', sort: 2 }
@@ -77,33 +75,34 @@ function getMainContent(ticket: Ticket): { title: string; items: string[] } {
   }
 }
 
-function getExtraInfo(ticket: Ticket): string[] {
-  const info: string[] = []
-  if (ticket.location) info.push(`📍 ${LOCATION_LABELS[ticket.location] ?? ticket.location}`)
-  if (ticket.guestCount) info.push(`👤 ${ticket.guestCount} чел.`)
-  if (ticket.description && ticket.type !== 'custom') info.push(`💬 ${ticket.description}`)
+function getExtraInfo(ticket: Ticket): { icon: React.ReactNode; text: string }[] {
+  const info: { icon: React.ReactNode; text: string }[] = []
+  if (ticket.location) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>, text: LOCATION_LABELS[ticket.location] ?? ticket.location })
+  if (ticket.guestCount) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, text: `${ticket.guestCount} чел.` })
+  if (ticket.description && ticket.type !== 'custom') info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>, text: ticket.description })
   return info
 }
 
 const NEXT_STATUS: Record<string, TicketStatus> = { new: 'accepted', accepted: 'in_progress', in_progress: 'done' }
 const NEXT_LABEL: Record<string, string> = { new: 'Принять', accepted: 'В работу', in_progress: 'Готово' }
 
+const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
 export default function Tickets() {
   const [tickets, setTickets] = useState<Ticket[]>(mockTickets.filter(t => t.type !== 'gates'))
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
 
   function handleStatusChange(id: string, status: TicketStatus) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
-    setSelectedTicket(prev => prev && prev.id === id ? { ...prev, status } : prev)
   }
 
   function handleArchive(id: string) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'archived' } : t))
-    setSelectedTicket(null)
+    setExpandedId(null)
   }
 
   const filtered = useMemo(() => {
@@ -142,7 +141,7 @@ export default function Tickets() {
         {(['all', 'food', 'minibar', 'transfer', 'cleaning', 'towels'] as FilterType[]).map(t => (
           <button key={t} onClick={() => setTypeFilter(t)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${typeFilter === t ? 'bg-gray-800 dark:bg-white/15 border-gray-800 dark:border-white/30 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-            {t === 'all' ? 'Все типы' : `${TYPE_CONFIG[t]?.icon} ${TYPE_CONFIG[t]?.label}`}
+            {t === 'all' ? 'Все типы' : TYPE_CONFIG[t]?.label}
           </button>
         ))}
       </div>
@@ -155,32 +154,36 @@ export default function Tickets() {
       ) : (
         <div className="space-y-3">
           {filtered.map(ticket => {
-            const config = TYPE_CONFIG[ticket.type] ?? { icon: '📋', label: 'Заявка' }
+            const config = TYPE_CONFIG[ticket.type] ?? { icon: null, label: 'Заявка' }
             const houseNumber = getHouseNumber(ticket.houseId)
             const mainContent = getMainContent(ticket)
             const extraInfo = getExtraInfo(ticket)
             const urgency = getUrgency(ticket.desiredAt)
+            const isExpanded = expandedId === ticket.id
+            const nextStatus = NEXT_STATUS[ticket.status]
+            const nextLabel = NEXT_LABEL[ticket.status]
 
             return (
               <div key={ticket.id}
-                onClick={() => setSelectedTicket(ticket)}
-                className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-colors cursor-pointer active:scale-[0.98]">
+                onClick={() => setExpandedId(isExpanded ? null : ticket.id)}
+                className="bg-white dark:bg-[#1a1d27] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 overflow-hidden transition-all cursor-pointer active:scale-[0.98]">
+
                 {/* Шапка */}
-                <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-2">
+                <div className="px-4 pt-3 pb-1 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-lg shrink-0">{config.icon}</span>
+                    <span className="text-gray-600 dark:text-white/60 shrink-0">{config.icon}</span>
                     <span className="font-bold text-sm text-gray-800 dark:text-white truncate">{config.label}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/50 text-[10px] font-bold px-2 py-0.5 rounded">#{houseNumber}</span>
-                    <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[ticket.status] ?? 'bg-gray-400'}`}></span>
-                    <span className="text-[10px] font-bold text-gray-600 dark:text-white/50 uppercase">{STATUS_LABELS[ticket.status] ?? ticket.status}</span>
+                    <span className="bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/50 text-[11px] font-bold px-2 py-0.5 rounded">Домик №{houseNumber}</span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${STATUS_COLORS[ticket.status] ?? 'bg-gray-400'}`}></span>
+                    <span className="text-[11px] font-semibold text-gray-600 dark:text-white/50">{STATUS_LABELS[ticket.status] ?? ticket.status}</span>
                   </div>
                 </div>
 
-                {/* Время создания (мелкое, серое) */}
+                {/* Заказано в */}
                 <div className="px-4 pb-1">
-                  <span className="text-[10px] text-gray-400 dark:text-white/25">{formatCreationTime(ticket.sentAt)}</span>
+                  <span className="text-[11px] text-gray-400 dark:text-white/30">Заказано в {formatCreationTime(ticket.sentAt)}</span>
                 </div>
 
                 {/* Основная информация */}
@@ -189,28 +192,67 @@ export default function Tickets() {
                     {mainContent.title && <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-0.5">{mainContent.title}</p>}
                     <div className="space-y-0">
                       {mainContent.items.map((item, i) => (
-                        <p key={i} className="text-sm font-medium text-gray-800 dark:text-white leading-tight">{item}</p>
+                        <p key={i} className="text-sm font-medium text-gray-800 dark:text-white leading-tight">• {item}</p>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Время выполнения — приоритет */}
+                {/* Время выполнения */}
                 {ticket.desiredAt && (
-                  <div className="px-4 py-1.5">
+                  <div className="px-4 py-1.5 flex items-center gap-1.5">
+                    <span className="text-gray-400 dark:text-white/30"><ClockIcon /></span>
                     <span className={`text-sm font-semibold ${urgency.color}`}>
-                      🕒 {getDesiredTimeLabel(ticket.type)} {formatDesiredTime(ticket.desiredAt)}
+                      {getDesiredTimeLabel(ticket.type)} {formatDesiredTime(ticket.desiredAt)}
                     </span>
-                    {urgency.label && <span className={`ml-2 text-xs ${urgency.color}`}>{urgency.label}</span>}
+                    {urgency.label && <span className={`text-xs ${urgency.color}`}>{urgency.label}</span>}
                   </div>
                 )}
 
                 {/* Доп. информация */}
                 {extraInfo.length > 0 && (
-                  <div className="px-4 pb-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                  <div className="px-4 pb-3 flex flex-wrap gap-x-4 gap-y-1">
                     {extraInfo.map((info, i) => (
-                      <span key={i} className="text-[11px] text-gray-500 dark:text-white/40">{info}</span>
+                      <span key={i} className="flex items-center gap-1 text-xs text-gray-600 dark:text-white/50">
+                        <span className="text-gray-400 dark:text-white/30">{info.icon}</span>
+                        {info.text}
+                      </span>
                     ))}
+                  </div>
+                )}
+
+                {/* Расширенный блок */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-white/10 space-y-3">
+                    {ticket.items && ticket.items.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider">Состав</p>
+                        {ticket.items.map(item => (
+                          <div key={item.menuItemId} className="flex justify-between text-xs text-gray-700 dark:text-white/70">
+                            <span>• {item.name} ×{item.quantity}</span>
+                            <span>{item.price * item.quantity} ₽</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between text-xs font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
+                          <span>Итого</span>
+                          <span>{ticket.items.reduce((s, i) => s + i.price * i.quantity, 0)} ₽</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {nextStatus && (
+                        <button onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, nextStatus) }}
+                          className={`py-2.5 rounded-xl text-xs font-bold text-white ${ticket.status === 'new' ? 'bg-amber-500' : ticket.status === 'accepted' ? 'bg-blue-500' : 'bg-green-500'}`}>
+                          {nextLabel}
+                        </button>
+                      )}
+                      {ticket.status === 'done' && (
+                        <button onClick={(e) => { e.stopPropagation(); handleArchive(ticket.id) }}
+                          className="py-2.5 rounded-xl text-xs font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
+                          В архив
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -218,84 +260,6 @@ export default function Tickets() {
           })}
         </div>
       )}
-
-      {/* Экран деталей заявки */}
-      {selectedTicket && (() => {
-        const t = selectedTicket
-        const config = TYPE_CONFIG[t.type] ?? { icon: '📋', label: 'Заявка' }
-        const houseNumber = getHouseNumber(t.houseId)
-        const mainContent = getMainContent(t)
-        const urgency = getUrgency(t.desiredAt)
-        const nextStatus = NEXT_STATUS[t.status]
-        const nextLabel = NEXT_LABEL[t.status]
-
-        return (
-          <Modal open={!!selectedTicket} onClose={() => setSelectedTicket(null)} title={`${config.icon} ${config.label}`}>
-            <div className="p-5 space-y-4">
-              {/* Шапка */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/50 text-xs font-bold px-2 py-1 rounded">Домик #{houseNumber}</span>
-                  <Badge status={t.status} />
-                </div>
-                <span className="text-xs text-gray-400 dark:text-white/30">{formatCreationTime(t.sentAt)}</span>
-              </div>
-
-              {/* Основная информация */}
-              {mainContent.items.length > 0 && (
-                <div>
-                  {mainContent.title && <p className="text-xs font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider mb-1">{mainContent.title}</p>}
-                  <div className="space-y-1">
-                    {mainContent.items.map((item, i) => (
-                      <p key={i} className="text-sm font-medium text-gray-800 dark:text-white">{item}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Время выполнения */}
-              {t.desiredAt && (
-                <div className={`p-3 rounded-xl ${urgency.color.includes('red') ? 'bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20' : urgency.color.includes('orange') ? 'bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20' : 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10'}`}>
-                  <span className={`text-sm font-semibold ${urgency.color}`}>
-                    🕒 {getDesiredTimeLabel(t.type)} {formatDesiredTime(t.desiredAt)}
-                  </span>
-                  {urgency.label && <span className={`ml-2 text-xs ${urgency.color}`}>{urgency.label}</span>}
-                </div>
-              )}
-
-              {/* Все детали */}
-              <div className="space-y-1 text-xs text-gray-500 dark:text-white/40">
-                {t.location && <p>📍 {LOCATION_LABELS[t.location] ?? t.location}</p>}
-                {t.guestCount && <p>👤 {t.guestCount} чел.</p>}
-                {t.description && <p>💬 {t.description}</p>}
-                {t.items && t.items.length > 0 && t.items.map(item => (
-                  <p key={item.menuItemId}>• {item.name} ×{item.quantity} — {item.price * item.quantity} ₽</p>
-                ))}
-              </div>
-
-              {/* Действия */}
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                {nextStatus && (
-                  <button onClick={() => handleStatusChange(t.id, nextStatus)}
-                    className={`py-3 rounded-xl text-sm font-bold text-white ${t.status === 'new' ? 'bg-amber-500' : t.status === 'accepted' ? 'bg-blue-500' : 'bg-green-500'}`}>
-                    {nextLabel}
-                  </button>
-                )}
-                {t.status === 'done' && (
-                  <button onClick={() => handleArchive(t.id)}
-                    className="py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
-                    В архив
-                  </button>
-                )}
-                <button onClick={() => setSelectedTicket(null)}
-                  className="py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-white/50 bg-gray-100 dark:bg-white/5">
-                  Закрыть
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )
-      })()}
     </div>
   )
 }
