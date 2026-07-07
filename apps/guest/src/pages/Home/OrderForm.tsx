@@ -75,7 +75,6 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   const [cart, setCart] = useState<Record<string, number>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [cooldown, setCooldown] = useState(0)
-  const [offlineToast, setOfflineToast] = useState(false)
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function setVal(key: string, value: unknown) {
@@ -102,14 +101,6 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   }
 
   useEffect(() => {
-    const handleOffline = () => { setOfflineToast(true) }
-    const handleOnline = () => { setOfflineToast(false) }
-    window.addEventListener('offline', handleOffline)
-    window.addEventListener('online', handleOnline)
-    return () => { window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
-  }, [])
-
-  useEffect(() => {
     if (cooldown <= 0) return
     cooldownRef.current = setInterval(() => {
       setCooldown(prev => {
@@ -121,7 +112,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   }, [cooldown])
 
   function handleSubmit() {
-    if (!navigator.onLine) { setOfflineToast(true); setTimeout(() => setOfflineToast(false), 3000); return }
+    if (!navigator.onLine) return
 
     const validationErrors = validate(steps, values, cart)
     if (Object.keys(validationErrors).length > 0) {
@@ -303,12 +294,6 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
       )}
 
       {step === 'success' && <SuccessScreen title={t('food.success')} message={t('food.successMsg')} onClose={handleClose} />}
-
-      {offlineToast && (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-6 py-3 rounded-full shadow-2xl font-medium animate-slide-up z-50">
-          {t('validation.offline')}
-        </div>
-      )}
     </Modal>
   )
 }

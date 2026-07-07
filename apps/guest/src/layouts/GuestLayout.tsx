@@ -1,11 +1,29 @@
+import { useState, useEffect } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { ConnectionBanner } from '@glamping/ui'
+import type { ConnectionStatus } from '@glamping/ui'
+import { ThemeToggle } from '@glamping/ui'
 
 export default function GuestLayout() {
   const { t } = useTranslation()
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
+    navigator.onLine ? 'connected' : 'offline'
+  )
+
+  useEffect(() => {
+    const handleOffline = () => setConnectionStatus('offline')
+    const handleOnline = () => setConnectionStatus('connected')
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline)
+    return () => { window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
+  }, [])
 
   return (
     <div className="flex flex-col h-screen bg-glamp-50 dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 overflow-hidden transition-colors">
+      <ConnectionBanner status={connectionStatus} />
+      <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>
+
       <main className="flex-1 overflow-y-auto pb-20">
         <Outlet />
       </main>
