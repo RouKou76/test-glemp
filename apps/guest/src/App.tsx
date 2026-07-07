@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from '@glamping/ui'
+import { i18n } from '@glamping/utils'
 import GuestLayout from './layouts/GuestLayout'
 import Home from './pages/Home/Home'
 import Chat from './pages/Chat/Chat'

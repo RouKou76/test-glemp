@@ -6,3 +6,5 @@ export * from './mocks/transferDestinations'
 export * from './mocks/services'
 export * from './mocks/houses'
 export * from './mocks/messages'
+
+export { default as i18n } from './i18n'
