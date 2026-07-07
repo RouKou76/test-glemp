@@ -102,6 +102,14 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   }
 
   useEffect(() => {
+    const handleOffline = () => { setOfflineToast(true); setTimeout(() => setOfflineToast(false), 3000) }
+    const handleOnline = () => { setOfflineToast(false) }
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline)
+    return () => { window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
+  }, [])
+
+  useEffect(() => {
     if (cooldown <= 0) return
     cooldownRef.current = setInterval(() => {
       setCooldown(prev => {
