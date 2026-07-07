@@ -112,6 +112,7 @@
     "required": "This field is required",
     "selectTime": "Please select a time",
     "selectOption": "Please select {{field}}",
-    "selectDish": "Please select at least one item"
+    "selectDish": "Please select at least one item",
+    "offline": "No network connection"
   }
 }

@@ -112,6 +112,7 @@
     "required": "请填写此字段",
     "selectTime": "请选择时间",
     "selectOption": "请选择{{field}}",
-    "selectDish": "请至少选择一项"
+    "selectDish": "请至少选择一项",
+    "offline": "无网络连接"
   }
 }
