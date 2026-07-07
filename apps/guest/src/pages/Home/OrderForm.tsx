@@ -102,7 +102,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
   }
 
   useEffect(() => {
-    const handleOffline = () => { setOfflineToast(true); setTimeout(() => setOfflineToast(false), 3000) }
+    const handleOffline = () => { setOfflineToast(true) }
     const handleOnline = () => { setOfflineToast(false) }
     window.addEventListener('offline', handleOffline)
     window.addEventListener('online', handleOnline)
