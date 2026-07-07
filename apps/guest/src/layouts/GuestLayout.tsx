@@ -4,20 +4,22 @@ import { useTranslation } from 'react-i18next'
 import { ConnectionBanner } from '@glamping/ui'
 import type { ConnectionStatus } from '@glamping/ui'
 import { ThemeToggle } from '@glamping/ui'
+import { useConnectionStatus } from '@glamping/api'
 
 export default function GuestLayout() {
   const { t } = useTranslation()
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
-    navigator.onLine ? 'connected' : 'offline'
-  )
+  const { isConnected } = useConnectionStatus({ checkInterval: 15000 })
+  const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
 
   useEffect(() => {
-    const handleOffline = () => setConnectionStatus('offline')
-    const handleOnline = () => setConnectionStatus('connected')
+    const handleOffline = () => setBrowserOnline(false)
+    const handleOnline = () => setBrowserOnline(true)
     window.addEventListener('offline', handleOffline)
     window.addEventListener('online', handleOnline)
     return () => { window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
   }, [])
+
+  const connectionStatus: ConnectionStatus = !browserOnline ? 'offline' : !isConnected ? 'reconnecting' : 'connected'
 
   return (
     <div className="flex flex-col h-screen bg-glamp-50 dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 overflow-hidden transition-colors">
