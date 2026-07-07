@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { mockServices, mockMenuItems, mockTransferDestinations } from '@glamping/utils'
 import type { Service } from '@glamping/types'
@@ -9,61 +9,6 @@ import { ThemeToggle } from '@glamping/ui'
 
 const SERVICE_COLORS: Record<string, string> = { cs1: 'bg-amber-500', cs2: 'bg-emerald-500' }
 
-const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = {
-  food: {
-    title: 'Заказ питания',
-    steps: [
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время подачи', required: true },
-      { type: 'select', key: 'period', label: 'Приём пищи', required: true, options: [
-        { value: 'breakfast', label: 'Завтрак' }, { value: 'lunch', label: 'Обед' }, { value: 'dinner', label: 'Ужин' },
-      ]},
-      { type: 'select', key: 'location', label: 'Место подачи', required: true, options: [
-        { value: 'cabin', label: 'В домик' }, { value: 'terrace', label: 'На террасу' }, { value: 'gazebo', label: 'В беседку' },
-      ]},
-      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar'), required: true },
-    ],
-    message: 'Заказ еды оформлен',
-  },
-  minibar: {
-    title: 'Пополнение мини-бара',
-    steps: [
-      { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar'), required: true },
-    ],
-    message: 'Заказ из минибара оформлен',
-  },
-  transfer: {
-    title: 'Трансфер',
-    steps: [
-      { type: 'select', key: 'destination', label: 'Направление', required: true, options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время подачи', required: true },
-    ],
-    message: 'Трансфер заказан',
-  },
-  cleaning: {
-    title: 'Заказ уборки',
-    steps: [
-      { type: 'date', key: 'date', label: 'Дата' },
-      { type: 'time', key: 'time', label: 'Время уборки', required: true },
-    ],
-    message: 'Клининг запланирован',
-  },
-}
-
-function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
-  const steps: OrderStep[] = []
-  if (service.fields.desiredAt?.enabled) steps.push({ type: 'time', key: 'time', label: service.fields.desiredAt.label || 'Желаемое время' })
-  if (service.fields.location?.enabled) steps.push({ type: 'select', key: 'location', label: service.fields.location.label || 'Место', options: [
-    { value: 'cabin', label: 'Домик' }, { value: 'terrace', label: 'Терраса' }, { value: 'gazebo', label: 'Беседка' },
-  ]})
-  if (service.fields.guestCount?.enabled) steps.push({ type: 'number', key: 'guestCount', label: service.fields.guestCount.label || 'Количество персон', min: 1, max: 20 })
-  if (service.fields.catalog?.enabled && service.items) steps.push({ type: 'catalog', key: 'catalog', label: service.fields.catalog.label || 'Каталог', items: service.items })
-  if (service.fields.geo?.enabled) steps.push({ type: 'text', key: 'geo', label: service.fields.geo.label || 'Адрес', placeholder: 'Введите адрес...' })
-  if (service.fields.comment?.enabled) steps.push({ type: 'textarea', key: 'comment', label: service.fields.comment.label || 'Комментарий', placeholder: 'Дополнительные пожелания...' })
-  return { title: service.name, steps, message: `Заявка «${service.name}» отправлена` }
-}
-
 type ActiveModal = ConfirmSheetType | 'food' | 'minibar' | 'transfer' | 'cleaning' | null
 
 export default function Home() {
@@ -71,6 +16,61 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
   const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+
+  const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => ({
+    food: {
+      title: t('food.title'),
+      steps: [
+        { type: 'date', key: 'date', label: t('food.date') },
+        { type: 'time', key: 'time', label: t('food.time'), required: true },
+        { type: 'select', key: 'period', label: t('food.period'), required: true, options: [
+          { value: 'breakfast', label: t('food.breakfast') }, { value: 'lunch', label: t('food.lunch') }, { value: 'dinner', label: t('food.dinner') },
+        ]},
+        { type: 'select', key: 'location', label: t('food.location'), required: true, options: [
+          { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
+        ]},
+        { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar'), required: true },
+      ],
+      message: t('food.successMsg'),
+    },
+    minibar: {
+      title: t('minibar.title'),
+      steps: [
+        { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar'), required: true },
+      ],
+      message: t('minibar.successMsg'),
+    },
+    transfer: {
+      title: t('transfer.title'),
+      steps: [
+        { type: 'select', key: 'destination', label: t('transfer.destination'), required: true, options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
+        { type: 'date', key: 'date', label: t('food.date') },
+        { type: 'time', key: 'time', label: t('transfer.time'), required: true },
+      ],
+      message: t('transfer.successMsg'),
+    },
+    cleaning: {
+      title: t('cleaning.title'),
+      steps: [
+        { type: 'date', key: 'date', label: t('food.date') },
+        { type: 'time', key: 'time', label: t('food.time'), required: true },
+      ],
+      message: t('cleaning.successMsg'),
+    },
+  }), [t])
+
+  function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
+    const steps: OrderStep[] = []
+    if (service.fields.desiredAt?.enabled) steps.push({ type: 'time', key: 'time', label: service.fields.desiredAt.label || t('validation.required') })
+    if (service.fields.location?.enabled) steps.push({ type: 'select', key: 'location', label: service.fields.location.label || 'Место', options: [
+      { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
+    ]})
+    if (service.fields.guestCount?.enabled) steps.push({ type: 'number', key: 'guestCount', label: service.fields.guestCount.label || 'Количество персон', min: 1, max: 20 })
+    if (service.fields.catalog?.enabled && service.items) steps.push({ type: 'catalog', key: 'catalog', label: service.fields.catalog.label || 'Каталог', items: service.items })
+    if (service.fields.geo?.enabled) steps.push({ type: 'text', key: 'geo', label: service.fields.geo.label || 'Адрес', placeholder: 'Введите адрес...' })
+    if (service.fields.comment?.enabled) steps.push({ type: 'textarea', key: 'comment', label: service.fields.comment.label || 'Комментарий', placeholder: 'Дополнительные пожелания...' })
+    return { title: service.name, steps, message: `Заявка «${service.name}» отправлена` }
+  }
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 

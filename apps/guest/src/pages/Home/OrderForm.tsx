@@ -43,32 +43,33 @@ function getMinTime(dateStr: string): string {
   return '00:00'
 }
 
-function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
-  const errors: Record<string, string> = {}
-  for (const s of steps) {
-    if (!s.required) continue
-    if (s.type === 'date') { continue }
-    else if (s.type === 'time') { if (!values[s.key]) errors[s.key] = 'Выберите время' }
-    else if (s.type === 'select') { if (!values[s.key]) errors[s.key] = `Выберите ${s.label.toLowerCase()}` }
-    else if (s.type === 'number') { continue }
-    else if (s.type === 'text') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
-    else if (s.type === 'textarea') { if (!(values[s.key] as string)?.trim()) errors[s.key] = `Заполните ${s.label.toLowerCase()}` }
-    else if (s.type === 'menu') { if (!Object.values(cart).some(q => q > 0)) errors[s.key] = 'Выберите хотя бы одну позицию' }
-    else if (s.type === 'catalog') {
-      const hasChecked = s.items.some(i => values[`${s.key}_selected_${i.id}`])
-      if (!hasChecked) errors[s.key] = 'Выберите хотя бы одну позицию'
-    }
-  }
-  return errors
-}
-
-function ErrorMsg({ text }: { text?: string }) {
-  if (!text) return null
-  return <p className="text-red-500 text-sm mt-1">{text}</p>
-}
-
 export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormProps) {
   const { t, i18n } = useTranslation()
+
+  function validate(steps: OrderStep[], values: Record<string, unknown>, cart: Record<string, number>): Record<string, string> {
+    const errors: Record<string, string> = {}
+    for (const s of steps) {
+      if (!s.required) continue
+      if (s.type === 'date') { continue }
+      else if (s.type === 'time') { if (!values[s.key]) errors[s.key] = t('validation.selectTime') }
+      else if (s.type === 'select') { if (!values[s.key]) errors[s.key] = t('validation.selectOption', { field: s.label.toLowerCase() }) }
+      else if (s.type === 'number') { continue }
+      else if (s.type === 'text') { if (!(values[s.key] as string)?.trim()) errors[s.key] = t('validation.required') }
+      else if (s.type === 'textarea') { if (!(values[s.key] as string)?.trim()) errors[s.key] = t('validation.required') }
+      else if (s.type === 'menu') { if (!Object.values(cart).some(q => q > 0)) errors[s.key] = t('validation.selectDish') }
+      else if (s.type === 'catalog') {
+        const hasChecked = s.items.some(i => values[`${s.key}_selected_${i.id}`])
+        if (!hasChecked) errors[s.key] = t('validation.selectDish')
+      }
+    }
+    return errors
+  }
+
+  function ErrorMsg({ text }: { text?: string }) {
+    if (!text) return null
+    return <p className="text-red-500 text-sm mt-1">{text}</p>
+  }
+
   const [step, setStep] = useState<'edit' | 'success'>('edit')
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [cart, setCart] = useState<Record<string, number>>({})
