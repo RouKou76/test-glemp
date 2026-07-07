@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
 import type { MenuItem, TicketItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
@@ -67,6 +68,7 @@ function ErrorMsg({ text }: { text?: string }) {
 }
 
 export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormProps) {
+  const { t, i18n } = useTranslation()
   const [step, setStep] = useState<'edit' | 'success'>('edit')
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [cart, setCart] = useState<Record<string, number>>({})
@@ -164,8 +166,8 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
                   onChange={e => setVal(s.key, e.target.value)}
                   className={`w-full p-3 border rounded-xl text-sm text-gray-800 dark:text-white bg-white dark:bg-white/5 focus:outline-none focus:ring-2 focus:ring-glamp-500 [color-scheme:dark] ${errors[s.key] ? 'border-red-400 dark:border-red-400' : 'border-gray-200 dark:border-white/10'}`} />
                 <div className="flex gap-2 mt-2">
-                  <button onClick={() => setVal(s.key, todayStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>Сегодня</button>
-                  <button onClick={() => setVal(s.key, tomorrowStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>Завтра</button>
+                  <button onClick={() => setVal(s.key, todayStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === todayStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{t('food.today')}</button>
+                  <button onClick={() => setVal(s.key, tomorrowStr())} className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${(values[s.key] || todayStr()) === tomorrowStr() ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{t('food.tomorrow')}</button>
                 </div>
                 <ErrorMsg text={errors[s.key]} />
               </div>
@@ -229,7 +231,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
             if (s.type === 'menu') return (
               <div key={s.key}>
-                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">Меню{s.required && ' *'}</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{t('food.menu')}{s.required && ' *'}</label>
                 <div className="space-y-2">
                   {s.items.filter(i => !i.hidden).map(item => (
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
@@ -276,19 +278,19 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
 
           {cartItems.length > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-white/50">Позиций: {cartItems.reduce((s, i) => s + i.qty, 0)}</span>
+              <span className="text-gray-600 dark:text-white/50">{t('food.subtotal')}: {cartItems.reduce((s, i) => s + i.qty, 0)}</span>
               <span className="text-gray-800 dark:text-white font-bold">{totalPrice} ₽</span>
             </div>
           )}
 
           <button onClick={handleSubmit} disabled={cooldown > 0}
             className="w-full bg-glamp-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-glamp-700 active:scale-95 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
-            {cooldown > 0 ? `Подождите · ${cooldown}с` : 'Отправить'}
+            {cooldown > 0 ? `Подождите · ${cooldown}с` : t('food.submit')}
           </button>
         </div>
       )}
 
-      {step === 'success' && <SuccessScreen title="Заявка принята!" message="Ожидайте подтверждения." onClose={handleClose} />}
+      {step === 'success' && <SuccessScreen title={t('food.success')} message={t('food.successMsg')} onClose={handleClose} />}
     </Modal>
   )
 }
