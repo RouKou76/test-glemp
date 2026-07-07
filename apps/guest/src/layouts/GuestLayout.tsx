@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ConnectionBanner } from '@glamping/ui'
-import type { ConnectionStatus } from '@glamping/ui'
 import { ThemeToggle } from '@glamping/ui'
 import { useConnectionStatus } from '@glamping/api'
+import { useGlampInfo } from '../contexts/GlampInfoContext'
 
 export default function GuestLayout() {
   const { t } = useTranslation()
+  const { info } = useGlampInfo()
   const { isConnected } = useConnectionStatus({ checkInterval: 15000 })
   const [browserOnline, setBrowserOnline] = useState(navigator.onLine)
 
@@ -19,12 +19,24 @@ export default function GuestLayout() {
     return () => { window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
   }, [])
 
-  const connectionStatus: ConnectionStatus = !browserOnline ? 'offline' : !isConnected ? 'reconnecting' : 'connected'
+  const isOffline = !browserOnline || !isConnected
 
   return (
     <div className="flex flex-col h-screen bg-glamp-50 dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 overflow-hidden transition-colors">
-      <ConnectionBanner status={connectionStatus} />
-      <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>
+      {isOffline && (
+        <div className="bg-red-50 dark:bg-red-500/10 border-b border-red-200 dark:border-red-500/20 px-4 py-3 flex items-center gap-3 transition-colors">
+          <div className="w-8 h-8 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center text-red-500 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-700 dark:text-red-400">{t('validation.offline')}</p>
+            <a href={`tel:${info.phone}`} className="text-sm text-red-600 dark:text-red-300 font-medium underline">{info.phone}</a>
+          </div>
+          <ThemeToggle />
+        </div>
+      )}
+
+      {!isOffline && <div className="fixed top-4 right-4 z-40"><ThemeToggle /></div>}
 
       <main className="flex-1 overflow-y-auto pb-20">
         <Outlet />

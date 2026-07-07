@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ThemeToggle } from '@glamping/ui'
+import { useGlampInfo } from '../../contexts/GlampInfoContext'
 
 const LANGUAGES: { value: string; label: string }[] = [
   { value: 'ru', label: 'Русский' },
@@ -9,6 +10,7 @@ const LANGUAGES: { value: string; label: string }[] = [
 
 export default function Info() {
   const { t, i18n } = useTranslation()
+  const { info } = useGlampInfo()
 
   function changeLang(lang: string) {
     i18n.changeLanguage(lang)
@@ -34,23 +36,23 @@ export default function Info() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white dark:bg-[#1a1d27] p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 transition-colors">
           <h3 className="text-gray-600 dark:text-gray-400 text-xs font-semibold mb-1 uppercase tracking-wider">{t('info.phone')}</h3>
-          <p className="text-lg font-bold text-gray-800 dark:text-gray-200">+7 (999) 123-45-67</p>
+          <p className="text-lg font-bold text-gray-800 dark:text-gray-200">{info.phone}</p>
         </div>
         <div className="bg-white dark:bg-[#1a1d27] p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 transition-colors">
           <h3 className="text-gray-600 dark:text-gray-400 text-xs font-semibold mb-1 uppercase tracking-wider">{t('info.wifi')}</h3>
-          <p className="text-base text-gray-800 dark:text-gray-200">{t('info.network')}: <strong>Glamp_Guest</strong></p>
-          <p className="text-base text-gray-800 dark:text-gray-200">{t('info.password')}: <strong>forest2026</strong></p>
+          <p className="text-base text-gray-800 dark:text-gray-200">{t('info.network')}: <strong>{info.wifiName}</strong></p>
+          <p className="text-base text-gray-800 dark:text-gray-200">{t('info.password')}: <strong>{info.wifiPassword}</strong></p>
         </div>
       </div>
 
       <div className="bg-white dark:bg-[#1a1d27] p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-white/10 mb-6 transition-colors">
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3">{t('info.about')}</h2>
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-base">{t('info.aboutText')}</p>
+        <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-base">{info.description}</p>
       </div>
 
       <div className="bg-glamp-50 dark:bg-glamp-900/30 p-6 rounded-3xl border border-glamp-100 dark:border-glamp-500/20 transition-colors">
         <h2 className="text-lg font-bold text-glamp-900 dark:text-glamp-100 mb-3">{t('info.services')}</h2>
-        <p className="text-glamp-800 dark:text-glamp-200 leading-relaxed text-base">{t('info.servicesText')}</p>
+        <p className="text-glamp-800 dark:text-glamp-200 leading-relaxed text-base">{info.servicesText}</p>
       </div>
     </div>
   )
