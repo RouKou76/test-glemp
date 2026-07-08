@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
-import type { MenuItem, TicketItem } from '@glamping/types'
+import type { MenuItem, TaskItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
 
 export interface OrderStepDate { type: 'date'; key: string; label: string; required?: boolean }
@@ -11,7 +11,7 @@ export interface OrderStepNumber { type: 'number'; key: string; label: string; m
 export interface OrderStepText { type: 'text'; key: string; label: string; placeholder?: string; required?: boolean }
 export interface OrderStepTextarea { type: 'textarea'; key: string; label: string; placeholder?: string; required?: boolean }
 export interface OrderStepMenu { type: 'menu'; key: string; items: MenuItem[]; required?: boolean }
-export interface OrderStepCatalog { type: 'catalog'; key: string; label: string; items: { id: string; name: string; price: number; hidden?: boolean }[]; required?: boolean }
+export interface OrderStepCatalog { type: 'catalog'; key: string; label: string; items: { id: string; name: string; price: number; isAvailable?: boolean }[]; required?: boolean }
 
 export type OrderStep = OrderStepDate | OrderStepTime | OrderStepSelect | OrderStepNumber | OrderStepText | OrderStepTextarea | OrderStepMenu | OrderStepCatalog
 
@@ -120,7 +120,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
       return
     }
 
-    const cartItems: TicketItem[] = Object.entries(cart)
+    const cartItems: TaskItem[] = Object.entries(cart)
       .filter(([, qty]) => qty > 0)
       .map(([id, quantity]) => {
         const ms = steps.find(s => s.type === 'menu')
@@ -131,7 +131,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
         return { menuItemId: id, name: id, price: 0, quantity }
       })
 
-    const catalogItems: TicketItem[] = []
+    const catalogItems: TaskItem[] = []
     steps.filter(s => s.type === 'catalog').forEach(s => {
       if (s.type === 'catalog') {
         s.items.filter(i => values[`${s.key}_selected_${i.id}`]).forEach(i => {
@@ -236,11 +236,11 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
               <div key={s.key}>
                 <label className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{t('food.menu')}{s.required && ' *'}</label>
                 <div className="space-y-2">
-                  {s.items.filter(i => !i.hidden).map(item => (
+                  {s.items.filter(i => !i.isAvailable).map(item => (
                     <div key={item.id} className="flex bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-xl p-3 shadow-sm items-center gap-3">
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-800 dark:text-white text-base leading-tight">{item.name}</h4>
-                        {item.showPrice && <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>}
+                        {item.isAvailable && <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{item.price} ₽</p>}
                       </div>
                       <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/5 rounded-lg p-0.5 border border-gray-200 dark:border-white/10">
                         <button onClick={() => setQty(item.id, -1)} disabled={!cart[item.id]}
@@ -260,7 +260,7 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
               <div key={s.key}>
                 <label className="text-sm font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2 block">{s.label}{s.required && ' *'}</label>
                 <div className="space-y-2">
-                  {s.items.filter(i => !i.hidden).map(item => (
+                  {s.items.filter(i => !i.isAvailable).map(item => (
                     <label key={item.id} className={`flex items-center justify-between p-3 rounded-xl border transition-colors cursor-pointer ${values[`${s.key}_selected_${item.id}`] ? 'border-glamp-500 bg-glamp-50 dark:bg-glamp-500/10' : 'border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'}`}>
                       <div className="flex items-center gap-3">
                         <input type="checkbox" checked={!!values[`${s.key}_selected_${item.id}`]}

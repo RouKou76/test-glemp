@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { mockMessages, mockHouses } from '@glamping/utils'
+import { mockMessages, mockHouses, mockGuestSessions } from '@glamping/utils'
 import type { Message, House } from '@glamping/types'
 
 export default function Chats() {
@@ -9,14 +9,14 @@ export default function Chats() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const occupiedHouses = mockHouses.filter(h => h.status === 'occupied')
   const activeMessages = messages.filter(m => m.houseId === activeHouseId)
-  const unreadCount = (houseId: string) => messages.filter(m => m.houseId === houseId && !m.read && m.sender === 'guest').length
+  const unreadCount = (houseId: string) => messages.filter(m => m.houseId === houseId && !m.read && m.sender === 'GUEST').length
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [activeMessages.length])
   useEffect(() => { setMessages(prev => prev.map(m => m.houseId === activeHouseId && !m.read ? { ...m, read: true } : m)) }, [activeHouseId])
 
   function handleSend() {
     const text = input.trim(); if (!text) return
-    setMessages(prev => [...prev, { id: `msg-${Date.now()}`, houseId: activeHouseId, sender: 'admin', text, timestamp: new Date().toISOString(), read: true }])
+    setMessages(prev => [...prev, { id: `msg-${Date.now()}`, houseId: activeHouseId, sender: 'STAFF', text, timestamp: new Date().toISOString(), read: true }])
     setInput('')
   }
 
@@ -40,13 +40,13 @@ export default function Chats() {
         </div>
       </div>
       <div className="px-4 py-2 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-[#0f1117]">
-        <p className="text-xs text-gray-600 dark:text-white/60">Домик #{activeHouse.number} · {activeHouse.guestCount ?? '—'} гостей · {activeHouse.lang.toUpperCase()}</p>
+        <p className="text-xs text-gray-600 dark:text-white/60">Домик #{activeHouse.number} · {mockGuestSessions.find(s => s.houseId === activeHouseId && s.isActive)?.guestCount ?? '—'} гостей · {mockGuestSessions.find(s => s.houseId === activeHouseId && s.isActive)?.lang.toUpperCase()}</p>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#0f1117]">
         {activeMessages.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-white/50 text-sm mt-10">История сообщений пуста</p>
         ) : activeMessages.map(msg => {
-          const isAdmin = msg.sender === 'admin'
+          const isAdmin = msg.sender === 'STAFF'
           return (
             <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${isAdmin ? 'bg-glamp-600 dark:text-white text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white rounded-bl-sm shadow-sm'}`}>

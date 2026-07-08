@@ -4,32 +4,34 @@ export const mockServices: Service[] = [
   {
     id: 'cs1',
     name: 'Русская баня',
-    price: '3 000 ₽ / час',
+    requiresTime: true,
+    priceInfo: '3 000 ₽ / час',
     icon: '🛁',
     active: true,
     assignedTo: 'admin',
-    fields: {
-      desiredAt: { enabled: true, label: 'Удобное время' },
-      guestCount: { enabled: true, label: 'Количество человек' },
-      comment: { enabled: true },
+    jsonSchema: {
+      type: 'object',
+      properties: {
+        desiredAt: { type: 'string', title: 'Удобное время' },
+        guestCount: { type: 'number', title: 'Количество человек', minimum: 1, maximum: 20 },
+        comment: { type: 'string', title: 'Комментарий' },
+      },
     },
   },
   {
     id: 'cs2',
     name: 'Прокат велосипедов',
-    price: '500 ₽ / час',
+    requiresTime: true,
+    priceInfo: '500 ₽ / час',
     icon: '🚲',
     active: true,
     assignedTo: 'admin',
-    fields: {
-      desiredAt: { enabled: true, label: 'Время начала' },
-      guestCount: { enabled: true, label: 'Количество велосипедов' },
-      catalog: { enabled: true, label: 'Выберите тип' },
+    jsonSchema: {
+      type: 'object',
+      properties: {
+        desiredAt: { type: 'string', title: 'Время начала' },
+        guestCount: { type: 'number', title: 'Количество велосипедов', minimum: 1, maximum: 10 },
+      },
     },
-    items: [
-      { id: 'bike1', name: 'Горный велосипед', price: 500, hidden: false },
-      { id: 'bike2', name: 'Городской велосипед', price: 400, hidden: false },
-      { id: 'bike3', name: 'Детский велосипед', price: 300, hidden: false },
-    ],
   },
 ]

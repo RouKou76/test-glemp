@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { mockHouses } from '@glamping/utils'
+import { mockHouses, mockGuestSessions } from '@glamping/utils'
 import type { House, Lang } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
@@ -25,19 +25,21 @@ export default function CheckIn() {
       {occupied.length > 0 && (
         <section>
           <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Заселены</p>
-          <div className="space-y-3">{occupied.map(house => (
+          <div className="space-y-3">{occupied.map(house => {
+            const session = mockGuestSessions.find(s => s.houseId === house.id && s.isActive)
+            return (
             <div key={house.id} className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 space-y-3 shadow-sm transition-colors">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-base font-bold text-gray-800 dark:text-white">Домик №{house.number}</p>
-                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{house.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === house.lang)?.label}</p>
-                  {house.checkInAt && <p className="text-xs text-gray-400 dark:text-white/50 mt-0.5">Заезд: {formatCheckIn(house.checkInAt)}</p>}
+                  <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{session?.guestCount ?? '—'} гостей · {LANG_OPTIONS.find(l => l.value === session?.lang)?.label}</p>
+                  {session?.checkInAt && <p className="text-xs text-gray-400 dark:text-white/50 mt-0.5">Заезд: {formatCheckIn(session.checkInAt)}</p>}
                 </div>
                 <span className="bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-bold px-2.5 py-1 rounded-full">Занят</span>
               </div>
               <button onClick={() => setCheckoutId(house.id)} className="w-full py-2 rounded-xl border border-red-200 dark:border-red-500/20 text-red-500 dark:text-red-400/70 text-xs font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors active:scale-95">Выселить домик</button>
             </div>
-          ))}</div>
+          )})}</div>
         </section>
       )}
       {vacant.length > 0 && (

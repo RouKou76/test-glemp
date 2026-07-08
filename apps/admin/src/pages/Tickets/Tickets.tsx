@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
-import { mockTickets, mockHouses, mockTransferDestinations } from '@glamping/utils'
-import type { Ticket, TicketStatus } from '@glamping/types'
+import { mockTasks, mockHouses } from '@glamping/utils'
+import type { Task, TaskStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
-type FilterStatus = TicketStatus | 'all'
+type FilterStatus = TaskStatus | 'all'
 type FilterType = string | 'all'
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -60,13 +60,10 @@ function getUrgency(desiredAt?: string): { color: string; label: string; sort: n
   return { color: 'text-gray-800 dark:text-white', label: '', sort: 2 }
 }
 
-function getMainContent(ticket: Ticket): { title: string; items: string[] } {
+function getMainContent(ticket: Task): { title: string; items: string[] } {
   switch (ticket.type) {
     case 'food': return { title: 'Заказ', items: ticket.items?.map(i => `${i.name} ×${i.quantity}`) ?? [] }
-    case 'transfer': {
-      const dest = mockTransferDestinations.find(d => d.id === ticket.geo)
-      return { title: 'Адрес', items: dest ? [dest.name] : [ticket.geo ?? ''] }
-    }
+    case 'transfer': return { title: 'Адрес', items: [ticket.geo ?? 'Не указан'] }
     case 'cleaning': return { title: '', items: ['Полная уборка домика'] }
     case 'towels': return { title: '', items: ['Замена полотенец'] }
     case 'minibar': return { title: '', items: ['Пополнение минибар'] }
@@ -75,7 +72,7 @@ function getMainContent(ticket: Ticket): { title: string; items: string[] } {
   }
 }
 
-function getExtraInfo(ticket: Ticket): { icon: React.ReactNode; text: string }[] {
+function getExtraInfo(ticket: Task): { icon: React.ReactNode; text: string }[] {
   const info: { icon: React.ReactNode; text: string }[] = []
   if (ticket.location) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>, text: LOCATION_LABELS[ticket.location] ?? ticket.location })
   if (ticket.guestCount) info.push({ icon: <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, text: `${ticket.guestCount} чел.` })
@@ -83,25 +80,25 @@ function getExtraInfo(ticket: Ticket): { icon: React.ReactNode; text: string }[]
   return info
 }
 
-const NEXT_STATUS: Record<string, TicketStatus> = { new: 'accepted', accepted: 'in_progress', in_progress: 'done' }
-const NEXT_LABEL: Record<string, string> = { new: 'Принять', accepted: 'В работу', in_progress: 'Готово' }
+const NEXT_STATUS: Record<string, TaskStatus> = { new: 'in_progress', in_progress: 'done' }
+const NEXT_LABEL: Record<string, string> = { new: 'В работу', in_progress: 'Готово' }
 
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 
 export default function Tickets() {
-  const [tickets, setTickets] = useState<Ticket[]>(mockTickets.filter(t => t.type !== 'gates'))
+  const [tickets, setTickets] = useState<Task[]>(mockTasks.filter(t => t.type !== 'gates'))
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
 
-  function handleStatusChange(id: string, status: TicketStatus) {
+  function handleStatusChange(id: string, status: TaskStatus) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
   }
 
   function handleArchive(id: string) {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'archived' } : t))
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'cancelled' } : t))
     setExpandedIds(prev => { const n = new Set(prev); n.delete(id); return n })
   }
 
@@ -109,13 +106,13 @@ export default function Tickets() {
     const result = tickets.filter(t => {
       const matchStatus = statusFilter === 'all' || t.status === statusFilter
       const matchType = typeFilter === 'all' || t.type === typeFilter
-      return matchStatus && matchType && t.status !== 'archived'
+      return matchStatus && matchType && t.status !== 'cancelled'
     })
     return result.sort((a, b) => {
       const urgA = getUrgency(a.desiredAt)
       const urgB = getUrgency(b.desiredAt)
       if (urgA.sort !== urgB.sort) return urgA.sort - urgB.sort
-      return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
   }, [tickets, statusFilter, typeFilter])
 
@@ -136,10 +133,10 @@ export default function Tickets() {
       </div>
 
       <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-        {(['all', 'new', 'accepted', 'in_progress', 'done'] as FilterStatus[]).map(s => (
+        {(['all', 'new', 'in_progress', 'done'] as FilterStatus[]).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${statusFilter === s ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-            {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'accepted' ? 'Приняты' : s === 'in_progress' ? 'В работе' : 'Готово'}
+            {s === 'all' ? 'Все' : s === 'new' ? 'Новые' : s === 'in_progress' ? 'В работе' : 'Готово'}
           </button>
         ))}
       </div>
@@ -190,7 +187,7 @@ export default function Tickets() {
 
                 {/* Заказано в */}
                 <div className="px-4 pb-1">
-                  <span className="text-[11px] text-gray-400 dark:text-white/30">Заказано в {formatCreationTime(ticket.sentAt)}</span>
+                  <span className="text-[11px] text-gray-400 dark:text-white/30">Заказано в {formatCreationTime(ticket.createdAt)}</span>
                 </div>
 
                 {/* Основная информация — только для не-еды */}
@@ -234,7 +231,7 @@ export default function Tickets() {
                     {ticket.items && ticket.items.length > 0 && (
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wider">Состав</p>
-                        {ticket.items.map(item => (
+                        {ticket.items!.map((item: { menuItemId: string; name: string; price: number; quantity: number }) => (
                           <div key={item.menuItemId} className="flex justify-between text-sm text-gray-800 dark:text-white">
                             <span>• {item.name} ×{item.quantity}</span>
                             <span>{item.price * item.quantity} ₽</span>
@@ -242,14 +239,14 @@ export default function Tickets() {
                         ))}
                         <div className="flex justify-between text-sm font-bold text-gray-800 dark:text-white pt-1 border-t border-gray-100 dark:border-white/10">
                           <span>Итого</span>
-                          <span>{ticket.items.reduce((s, i) => s + i.price * i.quantity, 0)} ₽</span>
+                          <span>{ticket.items!.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)} ₽</span>
                         </div>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-2">
                       {nextStatus && (
                         <button onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, nextStatus) }}
-                          className={`py-2.5 rounded-xl text-xs font-bold text-white ${ticket.status === 'new' ? 'bg-amber-500' : ticket.status === 'accepted' ? 'bg-blue-500' : 'bg-green-500'}`}>
+                          className={`py-2.5 rounded-xl text-xs font-bold text-white ${ticket.status === 'new' ? 'bg-amber-500' : ticket.status === 'in_progress' ? 'bg-blue-500' : 'bg-green-500'}`}>
                           {nextLabel}
                         </button>
                       )}

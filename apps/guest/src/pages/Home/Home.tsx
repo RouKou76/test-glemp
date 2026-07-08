@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { mockServices, mockMenuItems, mockTransferDestinations } from '@glamping/utils'
+import { mockServices, mockMenuItems } from '@glamping/utils'
 import type { Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
@@ -43,7 +43,7 @@ export default function Home() {
     transfer: {
       title: t('transfer.title'),
       steps: [
-        { type: 'select', key: 'destination', label: t('transfer.destination'), required: true, options: mockTransferDestinations.map(d => ({ value: d.id, label: `${d.name} — ${d.price} ₽` })) },
+        { type: 'text', key: 'address', label: t('transfer.destination'), required: true, placeholder: 'Введите адрес...' },
         { type: 'date', key: 'date', label: t('food.date') },
         { type: 'time', key: 'time', label: t('transfer.time'), required: true },
       ],
@@ -61,14 +61,8 @@ export default function Home() {
 
   function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
     const steps: OrderStep[] = []
-    if (service.fields.desiredAt?.enabled) steps.push({ type: 'time', key: 'time', label: service.fields.desiredAt.label || t('validation.required') })
-    if (service.fields.location?.enabled) steps.push({ type: 'select', key: 'location', label: service.fields.location.label || 'Место', options: [
-      { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
-    ]})
-    if (service.fields.guestCount?.enabled) steps.push({ type: 'number', key: 'guestCount', label: service.fields.guestCount.label || 'Количество персон', min: 1, max: 20 })
-    if (service.fields.catalog?.enabled && service.items) steps.push({ type: 'catalog', key: 'catalog', label: service.fields.catalog.label || 'Каталог', items: service.items })
-    if (service.fields.geo?.enabled) steps.push({ type: 'text', key: 'geo', label: service.fields.geo.label || 'Адрес', placeholder: 'Введите адрес...' })
-    if (service.fields.comment?.enabled) steps.push({ type: 'textarea', key: 'comment', label: service.fields.comment.label || 'Комментарий', placeholder: 'Дополнительные пожелания...' })
+    if (service.requiresTime) steps.push({ type: 'time', key: 'time', label: t('food.time') })
+    steps.push({ type: 'textarea', key: 'comment', label: t('food.time'), placeholder: 'Дополнительные пожелания...' })
     return { title: service.name, steps, message: `Заявка «${service.name}» отправлена` }
   }
 
@@ -110,7 +104,7 @@ export default function Home() {
             key={service.id}
             icon={<span className="text-base">{service.icon || '⭐'}</span>}
             label={service.name}
-            sublabel={service.price}
+            sublabel={service.priceInfo}
             color={SERVICE_COLORS[service.id] ?? 'bg-gray-600'}
             onClick={() => setActiveServiceConfig(buildServiceConfig(service))}
           />

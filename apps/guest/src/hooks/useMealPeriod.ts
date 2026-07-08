@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { MealPeriod, Ticket } from '@glamping/types'
+import type { MealPeriod, Task } from '@glamping/types'
 
 interface TimeSlot {
   period: MealPeriod
@@ -19,8 +19,8 @@ interface MealPeriodState {
   isInBuffer: boolean
   nextPeriod: MealPeriod
   bufferEndsAt: Date | null
-  draft: Ticket | null
-  saveDraft: (ticket: Ticket) => void
+  draft: Task | null
+  saveDraft: (ticket: Task) => void
   clearDraft: () => void
 }
 
@@ -70,7 +70,7 @@ export function computePeriodInfo(now: Date): {
 
 export function useMealPeriod(): MealPeriodState {
   const [now, setNow] = useState(() => new Date())
-  const [draft, setDraft] = useState<Ticket | null>(null)
+  const [draft, setDraft] = useState<Task | null>(null)
   const [prevPeriod, setPrevPeriod] = useState<MealPeriod>('none')
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function useMealPeriod(): MealPeriodState {
     }
   }, [currentPeriod, prevPeriod])
 
-  const saveDraft = useCallback((ticket: Ticket) => { setDraft(ticket) }, [])
+  const saveDraft = useCallback((ticket: Task) => { setDraft(ticket) }, [])
   const clearDraft = useCallback(() => { setDraft(null) }, [])
 
   return { currentPeriod, isInBuffer, nextPeriod, bufferEndsAt, draft, saveDraft, clearDraft }

@@ -1,6 +1,6 @@
 export type Lang = 'ru' | 'en' | 'zh'
 
-export type TicketType =
+export type TaskType =
   | 'food'
   | 'transfer'
   | 'cleaning'
@@ -9,12 +9,11 @@ export type TicketType =
   | 'gates'
   | 'custom'
 
-export type TicketStatus =
+export type TaskStatus =
   | 'new'
-  | 'accepted'
   | 'in_progress'
   | 'done'
-  | 'archived'
+  | 'cancelled'
 
 export type MenuCategory = 'breakfast' | 'lunch' | 'dinner' | 'minibar'
 
@@ -26,26 +25,27 @@ export type HouseStatus = 'occupied' | 'vacant'
 
 export type ServiceLocation = 'cabin' | 'terrace' | 'gazebo'
 
-export interface TicketItem {
+export interface TaskItem {
   menuItemId: string
   name: string
   price: number
   quantity: number
 }
 
-export interface Ticket {
+export interface Task {
   id: string
   houseId: string
-  type: TicketType
-  status: TicketStatus
-  sentAt: string
+  type: TaskType
+  status: TaskStatus
+  createdAt: string
   desiredAt?: string
   description?: string
   geo?: string
   assignedTo?: AssignedRole
-  items?: TicketItem[]
+  items?: TaskItem[]
   location?: ServiceLocation
   guestCount?: number
+  priceFix?: number
 }
 
 export type Translations = Partial<Record<Lang, {
@@ -59,61 +59,46 @@ export interface MenuItem {
   description?: string
   category: MenuCategory
   price: number
-  hidden: boolean
-  showPrice: boolean
-  translations?: Translations
+  isAvailable: boolean
 }
 
 export interface House {
   id: string
   number: number
   status: HouseStatus
+  deviceToken?: string
+}
+
+export interface GuestSession {
+  id: string
+  houseId: string
   guestCount?: number
   lang: Lang
   checkInAt?: string
-}
-
-export interface ServiceField {
-  enabled: boolean
-  label?: string
-}
-
-export interface ServiceItem {
-  id: string
-  name: string
-  price: number
-  hidden: boolean
-}
-
-export interface ServiceFieldConfig {
-  desiredAt?: ServiceField
-  location?: ServiceField
-  catalog?: ServiceField
-  geo?: ServiceField
-  guestCount?: ServiceField
-  comment?: ServiceField
+  checkOutAt?: string
+  isActive: boolean
 }
 
 export interface Service {
   id: string
   name: string
-  price?: string
+  requiresTime: boolean
+  priceInfo?: string
   icon?: string
+  jsonSchema?: Record<string, unknown>
   active: boolean
   assignedTo: AssignedRole
-  fields: ServiceFieldConfig
-  items?: ServiceItem[]
   translations?: Translations
 }
 
-export interface TransferDestination {
+export interface MealType {
   id: string
   name: string
-  km: number
-  price: number
+  startTime: string
+  endTime: string
 }
 
-export type MessageSender = 'guest' | 'admin' | AssignedRole
+export type MessageSender = 'GUEST' | 'STAFF'
 
 export interface Message {
   id: string
@@ -124,9 +109,19 @@ export interface Message {
   read: boolean
 }
 
+export interface Settings {
+  phone: string
+  wifiName: string
+  wifiPassword: string
+  rules: string
+  description: string
+  servicesText: string
+}
+
 export type WsEventType =
-  | 'ticket:new'
-  | 'ticket:updated'
+  | 'task:new'
+  | 'task:updated'
+  | 'task:cancelled'
   | 'message:new'
   | 'gate:request'
   | 'gate:confirmed'

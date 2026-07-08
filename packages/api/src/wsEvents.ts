@@ -1,17 +1,17 @@
 export const WS_EVENTS = {
   CONNECT: "client:connect",
   DISCONNECT: "client:disconnect",
-  TICKET_CREATE: "client:ticket:create",
-  TICKET_UPDATE: "client:ticket:update",
-  TICKET_ARCHIVE: "client:ticket:archive",
+  TASK_CREATE: "client:task:create",
+  TASK_UPDATE: "client:task:update",
+  TASK_CANCEL: "client:task:cancel",
   MESSAGE_SEND: "client:message:send",
   MESSAGE_READ: "client:message:read",
   GATE_REQUEST: "client:gate:request",
   GATE_RESPONSE: "client:gate:response",
 
-  TICKET_CREATED: "server:ticket:created",
-  TICKET_UPDATED: "server:ticket:updated",
-  TICKET_ARCHIVED: "server:ticket:archived",
+  TASK_CREATED: "server:task:created",
+  TASK_UPDATED: "server:task:updated",
+  TASK_CANCELLED: "server:task:cancelled",
   MESSAGE_RECEIVED: "server:message:received",
   MESSAGE_READ_UPDATE: "server:message:read:update",
   GATE_ALERT: "server:gate:alert",
@@ -19,7 +19,7 @@ export const WS_EVENTS = {
   HOUSE_UPDATED: "server:house:updated",
   MENU_UPDATED: "server:menu:updated",
   SERVICES_UPDATED: "server:services:updated",
-  INFO_UPDATED: "server:info:updated",
+  SETTINGS_UPDATED: "server:settings:updated",
   CONNECTION_STATUS: "server:connection:status",
 } as const;
 
@@ -31,7 +31,7 @@ export interface WSEvent<T = unknown> {
   timestamp: string;
 }
 
-export interface TicketCreatePayload {
+export interface TaskCreatePayload {
   houseId: string;
   type: string;
   items?: { menuItemId: string; name: string; price: number; quantity: number }[];
@@ -41,8 +41,8 @@ export interface TicketCreatePayload {
   description?: string;
 }
 
-export interface TicketUpdatePayload {
-  ticketId: string;
+export interface TaskUpdatePayload {
+  taskId: string;
   status: string;
   assignedTo?: string;
 }
@@ -57,6 +57,6 @@ export interface GateRequestPayload {
 }
 
 export interface GateResponsePayload {
-  ticketId: string;
+  taskId: string;
   approved: boolean;
 }

@@ -12,11 +12,11 @@ export default function Menu() {
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState('')
-  const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast'); const [formShowPrice, setFormShowPrice] = useState(true)
+  const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast')
 
   const filtered = useMemo(() => items.filter(i => category === 'all' || i.category === category), [items, category])
-  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setFormShowPrice(true); setShowForm(true) }
-  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setFormShowPrice(item.showPrice); setShowForm(true) }
+  function openAdd() { setEditItem(null); setFormName(''); setFormPrice(''); setFormCategory('breakfast'); setShowForm(true) }
+  function openEdit(item: MenuItem) { setEditItem(item); setFormName(item.name); setFormPrice(String(item.price)); setFormCategory(item.category); setShowForm(true) }
   const [formErrors, setFormErrors] = useState<{ name?: string; price?: string }>({})
   function handleSave() {
     const errs: { name?: string; price?: string } = {}
@@ -25,11 +25,11 @@ export default function Menu() {
     if (!formPrice || isNaN(price) || price < 0) errs.price = 'Укажите корректную цену'
     if (Object.keys(errs).length > 0) { setFormErrors(errs); return }
     setFormErrors({})
-    if (editItem) { setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, name: formName.trim(), price, category: formCategory, showPrice: formShowPrice } : i)) }
-    else { setItems(prev => [...prev, { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, hidden: false, showPrice: formShowPrice }]) }
+    if (editItem) { setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, name: formName.trim(), price, category: formCategory } : i)) }
+    else { setItems(prev => [...prev, { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true }]) }
     setShowForm(false)
   }
-  function toggleHidden(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, hidden: !i.hidden } : i)) }
+  function toggleAvailable(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i)) }
   const [deleteId, setDeleteId] = useState<string | null>(null)
   function handleDeleteConfirm() { if (deleteId) setItems(prev => prev.filter(i => i.id !== deleteId)); setDeleteId(null) }
 
@@ -46,14 +46,14 @@ export default function Menu() {
       </div>
       <div className="space-y-2">
         {filtered.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-white/20"><p className="text-4xl mb-3">🍽</p><p className="text-sm">Нет позиций</p></div>) : filtered.map(item => (
-          <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${item.hidden ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
+          <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-opacity ${!item.isAvailable ? 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 opacity-60' : 'border-gray-100 dark:border-white/10 bg-white dark:bg-[#1a1d27] shadow-sm'}`}>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
-              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.showPrice ? `${item.price} ₽` : 'Цена скрыта'}</p>
+              <p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{CATEGORY_LABELS[item.category]} · {item.price} ₽</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button onClick={() => toggleHidden(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
-                {item.hidden ? 'Показать' : 'Скрыть'}
+              <button onClick={() => toggleAvailable(item.id)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
+                {item.isAvailable ? 'Скрыть' : 'Показать'}
               </button>
               <button onClick={() => openEdit(item)} className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
@@ -74,10 +74,6 @@ export default function Menu() {
             <div>
               <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Категория</label>
               <div className="grid grid-cols-2 gap-2">{(Object.entries(CATEGORY_LABELS) as [MenuCategory, string][]).map(([val, label]) => (<button key={val} onClick={() => setFormCategory(val)} className={`py-2 rounded-xl text-xs font-medium border transition-colors ${formCategory === val ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600 dark:text-white/70">Показывать цену гостям</span>
-              <button onClick={() => setFormShowPrice(p => !p)} className={`w-12 h-6 rounded-full transition-colors relative ${formShowPrice ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formShowPrice ? 'left-7' : 'left-1'}`} /></button>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>

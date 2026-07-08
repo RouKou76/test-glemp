@@ -14,7 +14,7 @@ export default function Chat() {
 
   function send() {
     if (!msg.trim()) return
-    setMessages(prev => [...prev, { id: `msg${Date.now()}`, houseId: 'h1', sender: 'guest', text: msg, timestamp: new Date().toISOString(), read: true }])
+    setMessages(prev => [...prev, { id: `msg${Date.now()}`, houseId: 'h1', sender: 'GUEST', text: msg, timestamp: new Date().toISOString(), read: true }])
     setMsg('')
   }
 
@@ -34,10 +34,10 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-glamp-50 dark:bg-[#0f1117] transition-colors">
         {messages.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400 text-sm mt-10">{t('chat.empty')}</p>}
         {messages.map(m => (
-          <div key={m.id} className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[70%] p-3 rounded-2xl ${m.sender === 'guest' ? 'bg-glamp-600 text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-bl-sm shadow-sm'}`}>
+          <div key={m.id} className={`flex ${m.sender === 'GUEST' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[70%] p-3 rounded-2xl ${m.sender === 'GUEST' ? 'bg-glamp-600 text-white rounded-br-sm' : 'bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-bl-sm shadow-sm'}`}>
               <p className="text-base">{m.text}</p>
-              <span className={`text-xs mt-1 block ${m.sender === 'guest' ? 'text-glamp-200' : 'text-gray-500 dark:text-gray-400'}`}>
+              <span className={`text-xs mt-1 block ${m.sender === 'GUEST' ? 'text-glamp-200' : 'text-gray-500 dark:text-gray-400'}`}>
                 {new Date(m.timestamp).toLocaleTimeString(i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'zh' ? 'zh-CN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>

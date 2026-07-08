@@ -1,30 +1,32 @@
 import { useState } from 'react'
 import { mockServices } from '@glamping/utils'
-import type { Service, AssignedRole, ServiceFieldConfig } from '@glamping/types'
+import type { Service, AssignedRole } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
 const ROLE_LABELS: Record<AssignedRole, string> = { cook: 'Повар', cleaning: 'Клининг', driver: 'Водитель', admin: 'Администратор' }
-const FIELD_LABELS: Record<keyof ServiceFieldConfig, string> = { desiredAt: 'Время', location: 'Место', catalog: 'Каталог', geo: 'Адрес', guestCount: 'Персоны', comment: 'Комментарий' }
-type ServiceFields = Required<ServiceFieldConfig>
-const DEFAULT_FIELDS: ServiceFields = { desiredAt: { enabled: false }, location: { enabled: false }, catalog: { enabled: false }, geo: { enabled: false }, guestCount: { enabled: false }, comment: { enabled: false } }
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>(mockServices)
-  const [showForm, setShowForm] = useState(false); const [editService, setEditService] = useState<Service | null>(null)
-  const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState(''); const [formIcon, setFormIcon] = useState('')
-  const [formRole, setFormRole] = useState<AssignedRole>('admin'); const [formFields, setFormFields] = useState<ServiceFields>(DEFAULT_FIELDS)
-
-  function openAdd() { setEditService(null); setFormName(''); setFormPrice(''); setFormIcon(''); setFormRole('admin'); setFormFields(DEFAULT_FIELDS); setShowForm(true) }
-  function openEdit(service: Service) { setEditService(service); setFormName(service.name); setFormPrice(service.price ?? ''); setFormIcon(service.icon ?? ''); setFormRole(service.assignedTo); setFormFields({ desiredAt: service.fields.desiredAt ?? { enabled: false }, location: service.fields.location ?? { enabled: false }, catalog: service.fields.catalog ?? { enabled: false }, geo: service.fields.geo ?? { enabled: false }, guestCount: service.fields.guestCount ?? { enabled: false }, comment: service.fields.comment ?? { enabled: false } }); setShowForm(true) }
-  function toggleField(key: keyof ServiceFieldConfig) { setFormFields(prev => ({ ...prev, [key]: { ...prev[key], enabled: !prev[key].enabled } })) }
+  const [showForm, setShowForm] = useState(false)
+  const [editService, setEditService] = useState<Service | null>(null)
+  const [formName, setFormName] = useState('')
+  const [formPrice, setFormPrice] = useState('')
+  const [formIcon, setFormIcon] = useState('')
+  const [formRole, setFormRole] = useState<AssignedRole>('admin')
+  const [formRequiresTime, setFormRequiresTime] = useState(true)
   const [formErrors, setFormErrors] = useState<{ name?: string }>({})
+
+  function openAdd() { setEditService(null); setFormName(''); setFormPrice(''); setFormIcon(''); setFormRole('admin'); setFormRequiresTime(true); setShowForm(true) }
+  function openEdit(service: Service) { setEditService(service); setFormName(service.name); setFormPrice(service.priceInfo ?? ''); setFormIcon(service.icon ?? ''); setFormRole(service.assignedTo); setFormRequiresTime(service.requiresTime); setShowForm(true) }
+
   function handleSave() {
     if (!formName.trim()) { setFormErrors({ name: 'Введите название' }); return }
     setFormErrors({})
-    if (editService) { setServices(prev => prev.map(s => s.id === editService.id ? { ...s, name: formName.trim(), price: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, fields: formFields } : s)) }
-    else { setServices(prev => [...prev, { id: `cs-${Date.now()}`, name: formName.trim(), price: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, fields: formFields }]) }
+    if (editService) { setServices(prev => prev.map(s => s.id === editService.id ? { ...s, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, requiresTime: formRequiresTime } : s)) }
+    else { setServices(prev => [...prev, { id: `cs-${Date.now()}`, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, requiresTime: formRequiresTime }]) }
     setShowForm(false)
   }
+
   function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)) }
   const [deleteId, setDeleteId] = useState<string | null>(null)
   function handleDeleteConfirm() { if (deleteId) setServices(prev => prev.filter(s => s.id !== deleteId)); setDeleteId(null) }
@@ -41,11 +43,10 @@ export default function Services() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{service.icon || '⭐'}</span>
-                <div><p className="text-sm font-bold text-gray-800 dark:text-white">{service.name}</p><p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{service.price ?? 'Цена не указана'} · {ROLE_LABELS[service.assignedTo]}</p></div>
+                <div><p className="text-sm font-bold text-gray-800 dark:text-white">{service.name}</p><p className="text-xs text-gray-500 dark:text-white/60 mt-0.5">{service.priceInfo ?? 'Цена не указана'} · {ROLE_LABELS[service.assignedTo]}</p></div>
               </div>
               <button onClick={() => toggleActive(service.id)} className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${service.active ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${service.active ? 'left-6' : 'left-1'}`} /></button>
             </div>
-            {Object.entries(service.fields).filter(([, f]) => f?.enabled).map(([key, f]) => (<div key={key} className="text-xs text-gray-500 dark:text-white/60 flex items-center gap-2"><span>{FIELD_LABELS[key as keyof ServiceFieldConfig]}</span>{f?.label && <span className="text-gray-400 dark:text-white/20">→ «{f.label}»</span>}</div>))}
             <div className="flex gap-2 pt-1">
               <button onClick={() => openEdit(service)} className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-xs font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
@@ -64,16 +65,16 @@ export default function Services() {
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{editService ? 'Редактировать услугу' : 'Новая услуга'}</h3>
             <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Название *</label><input type="text" value={formName} onChange={e => { setFormName(e.target.value); setFormErrors({}) }} className={`w-full bg-white dark:bg-white/5 border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500 ${formErrors.name ? 'border-red-400' : 'border-gray-200 dark:border-white/10'}`} />{formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}</div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="⭐" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
-              <div><label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена</label><input type="text" value={formPrice} onChange={e => setFormPrice(e.target.value)} placeholder="500 ₽ / час" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+              <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Иконка</label><input type="text" value={formIcon} onChange={e => setFormIcon(e.target.value)} placeholder="⭐" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
+              <div><label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-1 block">Цена (текстом)</label><input type="text" value={formPrice} onChange={e => setFormPrice(e.target.value)} placeholder="500 ₽ / час" className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-glamp-500" /></div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Ответственный</label>
+              <label className="text-sm font-bold text-gray-600 dark:text-white/60 mb-2 block">Ответственный</label>
               <div className="grid grid-cols-2 gap-2">{(Object.entries(ROLE_LABELS) as [AssignedRole, string][]).map(([role, label]) => (<button key={role} onClick={() => setFormRole(role)} className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors text-left ${formRole === role ? 'bg-glamp-600 border-glamp-600 text-white' : 'border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/60 hover:bg-gray-50 dark:hover:bg-white/5'}`}>{label}</button>))}</div>
             </div>
-            <div>
-              <label className="text-xs font-bold text-gray-600 dark:text-white/60 mb-2 block">Поля для гостя</label>
-              <div className="space-y-2">{(Object.entries(FIELD_LABELS) as [keyof ServiceFieldConfig, string][]).map(([key, label]) => (<div key={key} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-white/5"><span className="text-sm text-gray-600 dark:text-white/60">{label}</span><button onClick={() => toggleField(key)} className={`w-11 h-6 rounded-full transition-colors relative ${formFields[key].enabled ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formFields[key].enabled ? 'left-6' : 'left-1'}`} /></button></div>))}</div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-white/70">Требует время</span>
+              <button onClick={() => setFormRequiresTime(p => !p)} className={`w-12 h-6 rounded-full transition-colors relative ${formRequiresTime ? 'bg-glamp-600' : 'bg-gray-300 dark:bg-white/10'}`}><span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formRequiresTime ? 'left-7' : 'left-1'}`} /></button>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button onClick={() => setShowForm(false)} className="py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/50 text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Отмена</button>

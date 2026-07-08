@@ -1,14 +1,13 @@
 import React from 'react'
-import type { TicketStatus } from '@glamping/types'
+import type { TaskStatus } from '@glamping/types'
 
-export interface BadgeProps { status: TicketStatus }
+export interface BadgeProps { status: TaskStatus }
 
-const statusConfig: Record<TicketStatus, { label: string; className: string }> = {
+const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
   new: { label: 'Новая', className: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' },
-  accepted: { label: 'Принята', className: 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' },
   in_progress: { label: 'В работе', className: 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400' },
   done: { label: 'Выполнена', className: 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' },
-  archived: { label: 'Архив', className: 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/40' },
+  cancelled: { label: 'Отменена', className: 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/40' },
 }
 
 export const Badge: React.FC<BadgeProps> = ({ status }) => {
