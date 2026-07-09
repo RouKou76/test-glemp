@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useApi, apiPost } from '@glamping/api'
+import { useApi, apiPost, useWebSocket, useNotifications } from '@glamping/api'
 import { mockHouses } from '@glamping/utils'
 import type { Task, TaskStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
@@ -94,6 +94,18 @@ export default function Tickets() {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates')) }, [apiTasks])
+
+  const { notify } = useNotifications()
+
+  useWebSocket({
+    onMessage: (event) => {
+      if (event.type === 'server:task:created') {
+        const task = event.payload as Task
+        setTickets(prev => [task, ...prev])
+        notify('Новая заявка', `${task.type} — Домик #${getHouseNumber(task.houseId)}`)
+      }
+    },
+  })
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
 

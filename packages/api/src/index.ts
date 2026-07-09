@@ -5,3 +5,4 @@ export type { WSEventType, WSEvent, TaskCreatePayload, TaskUpdatePayload, Messag
 export { useWebSocket } from "./useWebSocket";
 export type { WebSocketMessage } from "./useWebSocket";
 export { useConnectionStatus } from "./useConnectionStatus";
+export { useNotifications, requestNotificationPermission } from "./useNotifications";

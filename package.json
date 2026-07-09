@@ -19,6 +19,8 @@
     "start:admin": "serve apps/admin/dist -s -l $PORT"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-legacy": "^6.1.1",
     "concurrently": "^10.0.3",
     "terser": "^5.48.0",

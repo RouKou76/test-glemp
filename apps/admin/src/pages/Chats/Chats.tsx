@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useApi, useWebSocket } from '@glamping/api'
+import { useApi, useWebSocket, useNotifications } from '@glamping/api'
 import { mockHouses } from '@glamping/utils'
 import type { Message, House } from '@glamping/types'
 
@@ -14,10 +14,14 @@ export default function Chats() {
 
   useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])
 
+  const { notify } = useNotifications()
+
   const { send, isConnected } = useWebSocket({
     onMessage: (event) => {
       if (event.type === 'server:message:received') {
-        setMessages(prev => [...prev, event.payload as Message])
+        const msg = event.payload as Message
+        setMessages(prev => [...prev, msg])
+        notify('Новое сообщение', `Домик: ${msg.houseId}`)
       }
     },
   })
