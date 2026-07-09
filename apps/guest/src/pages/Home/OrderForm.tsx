@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
-import { useApi } from '@glamping/api'
+import { useApi, apiPost } from '@glamping/api'
 import type { MenuItem, TaskItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
 
@@ -142,10 +142,12 @@ export function OrderForm({ open, title, steps, onClose, onSubmit }: OrderFormPr
     })
 
     const allItems = [...cartItems, ...catalogItems]
-    if (allItems.length > 0) onSubmit({ ...values, items: allItems })
-    else onSubmit(values)
-    setStep('success')
-    setCooldown(5)
+    const payload: Record<string, unknown> = { ...values }
+    if (allItems.length > 0) payload.items = allItems
+
+    apiPost('/api/tasks', payload)
+      .then(() => { setStep('success'); setCooldown(5) })
+      .catch(() => { setErrors({ submit: 'Ошибка отправки' }) })
   }
 
   const menuStep = steps.find(s => s.type === 'menu')
