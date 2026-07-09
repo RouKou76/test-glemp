@@ -1,14 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
-import { mockMessages, mockHouses, mockGuestSessions } from '@glamping/utils'
+import { useApi, useWebSocket } from '@glamping/api'
+import { mockHouses } from '@glamping/utils'
 import type { Message, House } from '@glamping/types'
 
 export default function Chats() {
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
-  const [activeHouseId, setActiveHouseId] = useState<string>(mockHouses.find(h => h.status === 'occupied')?.id ?? mockHouses[0].id)
+  const { data: apiMessages } = useApi<Message[]>('/api/messages')
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const occupiedHouses = mockHouses.filter(h => h.status === 'occupied')
+  const [activeHouseId, setActiveHouseId] = useState<string>(occupiedHouses[0]?.id ?? 'h1')
   const activeMessages = messages.filter(m => m.houseId === activeHouseId)
+
+  useEffect(() => { if (apiMessages) setMessages(apiMessages) }, [apiMessages])
+
+  const { send, isConnected } = useWebSocket({
+    onMessage: (event) => {
+      if (event.type === 'server:message:received') {
+        setMessages(prev => [...prev, event.payload as Message])
+      }
+    },
+  })
+
   const unreadCount = (houseId: string) => messages.filter(m => m.houseId === houseId && !m.read && m.sender === 'GUEST').length
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [activeMessages.length])
@@ -16,6 +29,7 @@ export default function Chats() {
 
   function handleSend() {
     const text = input.trim(); if (!text) return
+    send('client:message:send', { houseId: activeHouseId, text })
     setMessages(prev => [...prev, { id: `msg-${Date.now()}`, houseId: activeHouseId, sender: 'STAFF', text, timestamp: new Date().toISOString(), read: true }])
     setInput('')
   }
@@ -40,7 +54,7 @@ export default function Chats() {
         </div>
       </div>
       <div className="px-4 py-2 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-[#0f1117]">
-        <p className="text-xs text-gray-600 dark:text-white/60">Домик #{activeHouse.number} · {mockGuestSessions.find(s => s.houseId === activeHouseId && s.isActive)?.guestCount ?? '—'} гостей · {mockGuestSessions.find(s => s.houseId === activeHouseId && s.isActive)?.lang.toUpperCase()}</p>
+        <p className="text-xs text-gray-600 dark:text-white/60">Домик #{activeHouse.number}</p>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#0f1117]">
         {activeMessages.length === 0 ? (

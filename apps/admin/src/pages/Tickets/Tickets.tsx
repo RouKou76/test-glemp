@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
-import { mockTasks, mockHouses } from '@glamping/utils'
+import { useApi, apiPost } from '@glamping/api'
+import { mockHouses } from '@glamping/utils'
 import type { Task, TaskStatus } from '@glamping/types'
 import { Badge } from '@glamping/ui'
 
@@ -86,20 +87,25 @@ const NEXT_LABEL: Record<string, string> = { new: 'В работу', in_progress
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 
 export default function Tickets() {
-  const [tickets, setTickets] = useState<Task[]>(mockTasks.filter(t => t.type !== 'gates'))
+  const { data: apiTasks } = useApi<Task[]>('/api/tasks')
+  const [tickets, setTickets] = useState<Task[]>([])
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => { if (apiTasks) setTickets(apiTasks.filter(t => t.type !== 'gates')) }, [apiTasks])
 
   function getHouseNumber(houseId: string): number { return mockHouses.find(h => h.id === houseId)?.number ?? 0 }
 
   function handleStatusChange(id: string, status: TaskStatus) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t))
+    apiPost(`/api/tasks/${id}`, { status }).catch(() => {})
   }
 
   function handleArchive(id: string) {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'cancelled' } : t))
     setExpandedIds(prev => { const n = new Set(prev); n.delete(id); return n })
+    apiPost(`/api/tasks/${id}/cancel`, {}).catch(() => {})
   }
 
   const filtered = useMemo(() => {

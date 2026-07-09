@@ -1,19 +1,25 @@
-import { useState } from 'react'
-import { mockHouses, mockGuestSessions } from '@glamping/utils'
-import type { House, Lang } from '@glamping/types'
+import { useState, useEffect } from 'react'
+import { useApi, apiPost } from '@glamping/api'
+import type { House, GuestSession, Lang } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
 const LANG_OPTIONS: { value: Lang; label: string }[] = [{ value: 'ru', label: '🇷🇺 Русский' }, { value: 'en', label: '🇬🇧 English' }, { value: 'zh', label: '🇨🇳 中文' }]
 
 export default function CheckIn() {
-  const [houses, setHouses] = useState<House[]>(mockHouses)
+  const { data: apiHouses } = useApi<House[]>('/api/houses')
+  const { data: apiSessions } = useApi<GuestSession[]>('/api/houses/sessions')
+  const [houses, setHouses] = useState<House[]>([])
+  const [sessions, setSessions] = useState<GuestSession[]>([])
   const [showForm, setShowForm] = useState(false); const [selectedHouse, setSelectedHouse] = useState<House | null>(null)
   const [formGuests, setFormGuests] = useState<number>(2); const [formLang, setFormLang] = useState<Lang>('ru')
 
+  useEffect(() => { if (apiHouses) setHouses(apiHouses) }, [apiHouses])
+  useEffect(() => { if (apiSessions) setSessions(apiSessions) }, [apiSessions])
+
   function openCheckIn(house: House) { setSelectedHouse(house); setFormGuests(2); setFormLang('ru'); setShowForm(true) }
-  function handleCheckIn() { if (!selectedHouse) return; setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied', guestCount: formGuests, lang: formLang, checkInAt: new Date().toISOString() } : h)); setShowForm(false) }
+  function handleCheckIn() { if (!selectedHouse) return; setHouses(prev => prev.map(h => h.id === selectedHouse.id ? { ...h, status: 'occupied' } : h)); apiPost(`/api/houses/${selectedHouse.id}/check-in`, { guestCount: formGuests, lang: formLang }).catch(() => {}); setShowForm(false) }
   const [checkoutId, setCheckoutId] = useState<string | null>(null)
-  function handleCheckoutConfirm() { if (checkoutId) setHouses(prev => prev.map(h => h.id === checkoutId ? { ...h, status: 'vacant', guestCount: undefined, checkInAt: undefined } : h)); setCheckoutId(null) }
+  function handleCheckoutConfirm() { if (checkoutId) { setHouses(prev => prev.map(h => h.id === checkoutId ? { ...h, status: 'vacant' } : h)); apiPost(`/api/houses/${checkoutId}/check-out`, {}).catch(() => {}) }; setCheckoutId(null) }
   function formatCheckIn(iso: string): string { return new Date(iso).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) }
 
   const occupied = houses.filter(h => h.status === 'occupied')
@@ -26,7 +32,7 @@ export default function CheckIn() {
         <section>
           <p className="text-xs font-bold text-gray-600 dark:text-white/50 uppercase tracking-wider mb-2">Заселены</p>
           <div className="space-y-3">{occupied.map(house => {
-            const session = mockGuestSessions.find(s => s.houseId === house.id && s.isActive)
+            const session = sessions.find(s => s.houseId === house.id && s.isActive)
             return (
             <div key={house.id} className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-white/10 rounded-2xl p-4 space-y-3 shadow-sm transition-colors">
               <div className="flex items-start justify-between">

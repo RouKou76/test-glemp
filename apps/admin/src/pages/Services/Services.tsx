@@ -1,13 +1,16 @@
-import { useState } from 'react'
-import { mockServices } from '@glamping/utils'
+import { useState, useEffect } from 'react'
+import { useApi, apiPost, apiDelete } from '@glamping/api'
 import type { Service, AssignedRole } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
 const ROLE_LABELS: Record<AssignedRole, string> = { cook: 'Повар', cleaning: 'Клининг', driver: 'Водитель', admin: 'Администратор' }
 
 export default function Services() {
-  const [services, setServices] = useState<Service[]>(mockServices)
+  const { data: apiServices } = useApi<Service[]>('/api/services')
+  const [services, setServices] = useState<Service[]>([])
   const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => { if (apiServices) setServices(apiServices) }, [apiServices])
   const [editService, setEditService] = useState<Service | null>(null)
   const [formName, setFormName] = useState('')
   const [formPrice, setFormPrice] = useState('')
@@ -22,14 +25,21 @@ export default function Services() {
   function handleSave() {
     if (!formName.trim()) { setFormErrors({ name: 'Введите название' }); return }
     setFormErrors({})
-    if (editService) { setServices(prev => prev.map(s => s.id === editService.id ? { ...s, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, requiresTime: formRequiresTime } : s)) }
-    else { setServices(prev => [...prev, { id: `cs-${Date.now()}`, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, requiresTime: formRequiresTime }]) }
+    if (editService) {
+      const updated = { ...editService, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, assignedTo: formRole, requiresTime: formRequiresTime }
+      setServices(prev => prev.map(s => s.id === editService.id ? updated : s))
+      apiPost(`/api/services/${editService.id}`, updated).catch(() => {})
+    } else {
+      const newService: Service = { id: `cs-${Date.now()}`, name: formName.trim(), priceInfo: formPrice || undefined, icon: formIcon || undefined, active: true, assignedTo: formRole, requiresTime: formRequiresTime }
+      setServices(prev => [...prev, newService])
+      apiPost('/api/services', newService).catch(() => {})
+    }
     setShowForm(false)
   }
 
-  function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)) }
+  function toggleActive(id: string) { setServices(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s)); apiPost(`/api/services/${id}`, { active: !services.find(s => s.id === id)?.active }).catch(() => {}) }
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  function handleDeleteConfirm() { if (deleteId) setServices(prev => prev.filter(s => s.id !== deleteId)); setDeleteId(null) }
+  function handleDeleteConfirm() { if (deleteId) { setServices(prev => prev.filter(s => s.id !== deleteId)); apiDelete(`/api/services/${deleteId}`).catch(() => {}) }; setDeleteId(null) }
 
   return (
     <div className="p-4 space-y-4">

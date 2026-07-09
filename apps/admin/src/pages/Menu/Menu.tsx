@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { mockMenuItems } from '@glamping/utils'
+import { useState, useMemo, useEffect } from 'react'
+import { useApi, apiPost, apiDelete } from '@glamping/api'
 import type { MenuItem, MenuCategory } from '@glamping/types'
 import { ConfirmDialog } from '@glamping/ui'
 
@@ -7,9 +7,12 @@ type CategoryFilter = MenuCategory | 'all'
 const CATEGORY_LABELS: Record<MenuCategory, string> = { breakfast: 'Завтрак', lunch: 'Обед', dinner: 'Ужин', minibar: 'Минибар' }
 
 export default function Menu() {
-  const [items, setItems] = useState<MenuItem[]>(mockMenuItems)
+  const { data: apiItems } = useApi<MenuItem[]>('/api/menu')
+  const [items, setItems] = useState<MenuItem[]>([])
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => { if (apiItems) setItems(apiItems) }, [apiItems])
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [formName, setFormName] = useState(''); const [formPrice, setFormPrice] = useState('')
   const [formCategory, setFormCategory] = useState<MenuCategory>('breakfast')
@@ -25,13 +28,20 @@ export default function Menu() {
     if (!formPrice || isNaN(price) || price < 0) errs.price = 'Укажите корректную цену'
     if (Object.keys(errs).length > 0) { setFormErrors(errs); return }
     setFormErrors({})
-    if (editItem) { setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, name: formName.trim(), price, category: formCategory } : i)) }
-    else { setItems(prev => [...prev, { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true }]) }
+    if (editItem) {
+      const updated = { ...editItem, name: formName.trim(), price, category: formCategory }
+      setItems(prev => prev.map(i => i.id === editItem.id ? updated : i))
+      apiPost(`/api/menu/${editItem.id}`, updated).catch(() => {})
+    } else {
+      const newItem: MenuItem = { id: `m-${Date.now()}`, name: formName.trim(), price, category: formCategory, isAvailable: true }
+      setItems(prev => [...prev, newItem])
+      apiPost('/api/menu', newItem).catch(() => {})
+    }
     setShowForm(false)
   }
-  function toggleAvailable(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i)) }
+  function toggleAvailable(id: string) { setItems(prev => prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i)); apiPost(`/api/menu/${id}`, { isAvailable: !items.find(i => i.id === id)?.isAvailable }).catch(() => {}) }
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  function handleDeleteConfirm() { if (deleteId) setItems(prev => prev.filter(i => i.id !== deleteId)); setDeleteId(null) }
+  function handleDeleteConfirm() { if (deleteId) { setItems(prev => prev.filter(i => i.id !== deleteId)); apiDelete(`/api/menu/${deleteId}`).catch(() => {}) }; setDeleteId(null) }
 
   return (
     <div className="p-4 space-y-4">
