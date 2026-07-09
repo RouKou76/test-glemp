@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { apiPost } from '@glamping/api'
 
 export interface GlampInfo {
   phone: string
@@ -20,32 +21,48 @@ const DEFAULT_INFO: GlampInfo = {
 
 interface GlampInfoContextType {
   info: GlampInfo
+  loading: boolean
   updateInfo: (patch: Partial<GlampInfo>) => void
 }
 
 const GlampInfoContext = createContext<GlampInfoContextType>({
   info: DEFAULT_INFO,
+  loading: false,
   updateInfo: () => {},
 })
 
 export function GlampInfoProvider({ children }: { children: ReactNode }) {
-  const [info, setInfo] = useState<GlampInfo>(() => {
-    try {
-      const saved = localStorage.getItem('glamp-info')
-      return saved ? { ...DEFAULT_INFO, ...JSON.parse(saved) } : DEFAULT_INFO
-    } catch { return DEFAULT_INFO }
-  })
+  const [info, setInfo] = useState<GlampInfo>(DEFAULT_INFO)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.data) setInfo(data.data)
+        else {
+          const saved = localStorage.getItem('glamp-info')
+          if (saved) setInfo({ ...DEFAULT_INFO, ...JSON.parse(saved) })
+        }
+      })
+      .catch(() => {
+        const saved = localStorage.getItem('glamp-info')
+        if (saved) setInfo({ ...DEFAULT_INFO, ...JSON.parse(saved) })
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
   function updateInfo(patch: Partial<GlampInfo>) {
     setInfo(prev => {
       const next = { ...prev, ...patch }
       localStorage.setItem('glamp-info', JSON.stringify(next))
+      apiPost('/api/settings', next).catch(() => {})
       return next
     })
   }
 
   return (
-    <GlampInfoContext.Provider value={{ info, updateInfo }}>
+    <GlampInfoContext.Provider value={{ info, loading, updateInfo }}>
       {children}
     </GlampInfoContext.Provider>
   )
