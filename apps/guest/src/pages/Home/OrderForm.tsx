@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '@glamping/ui'
+import { useApi } from '@glamping/api'
 import type { MenuItem, TaskItem } from '@glamping/types'
 import { SuccessScreen } from './SuccessScreen'
 

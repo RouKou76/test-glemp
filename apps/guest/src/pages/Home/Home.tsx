@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { mockServices, mockMenuItems } from '@glamping/utils'
-import type { Service } from '@glamping/types'
+import { useApi } from '@glamping/api'
+import type { Task, MenuItem, Service } from '@glamping/types'
 import { ServiceTile } from './ServiceTile'
 import { ConfirmSheet, type ConfirmSheetType } from './ConfirmSheet'
 import { OrderForm, type OrderStep } from './OrderForm'
@@ -17,7 +17,13 @@ export default function Home() {
   const [activeServiceConfig, setActiveServiceConfig] = useState<{ title: string; steps: OrderStep[]; message: string } | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => ({
+  const { data: services } = useApi<Service[]>('/api/services')
+  const { data: menuItems } = useApi<MenuItem[]>('/api/menu')
+  const activeServices = useMemo(() => services?.filter(s => s.active) ?? [], [services])
+
+  const SERVICE_CONFIGS: Record<string, { title: string; steps: OrderStep[]; message: string }> = useMemo(() => {
+    const items = menuItems ?? []
+    return {
     food: {
       title: t('food.title'),
       steps: [
@@ -29,14 +35,14 @@ export default function Home() {
         { type: 'select', key: 'location', label: t('food.location'), required: true, options: [
           { value: 'cabin', label: t('food.cabin') }, { value: 'terrace', label: t('food.terrace') }, { value: 'gazebo', label: t('food.gazebo') },
         ]},
-        { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category !== 'minibar'), required: true },
+        { type: 'menu', key: 'items', items: items.filter(i => i.category !== 'minibar'), required: true },
       ],
       message: t('food.successMsg'),
     },
     minibar: {
       title: t('minibar.title'),
       steps: [
-        { type: 'menu', key: 'items', items: mockMenuItems.filter(i => i.category === 'minibar'), required: true },
+        { type: 'menu', key: 'items', items: items.filter(i => i.category === 'minibar'), required: true },
       ],
       message: t('minibar.successMsg'),
     },
@@ -57,7 +63,8 @@ export default function Home() {
       ],
       message: t('cleaning.successMsg'),
     },
-  }), [t])
+  }
+  }, [t, menuItems])
 
   function buildServiceConfig(service: Service): { title: string; steps: OrderStep[]; message: string } {
     const steps: OrderStep[] = []
@@ -72,8 +79,6 @@ export default function Home() {
 
   function handleConfirm(type: ConfirmSheetType) { showToast(type === 'towels' ? t('towels.success') : t('gates.success')) }
   function handleOrderSubmit(_data: Record<string, unknown>, message: string) { showToast(message) }
-
-  const activeServices = mockServices.filter(s => s.active)
 
   return (
     <div className="p-6">
